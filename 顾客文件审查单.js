@@ -145,6 +145,8 @@ var gGrid_ModDoc = document.getElementById("Grid_ModDoc");//
 
 var gSerialNumber = document.getElementById("SerialNumber");//表單單號
 
+var tGrid_DocCategory = document.getElementById('Grid_DocCategory'); // 文件类别grd
+
 //取得使用者上級單位
 function getManager(){
 	if(gInputLabel_Author_txt.value !=""){
@@ -167,19 +169,21 @@ function getManager(){
 
 //获取显示/隐藏模块内 id   
 function getResumptionFormPrefix(){
-var tArray=[];
-/*********區塊移動元件名稱-字串組合*********/
-var tContactInformationStr1="Label3,Label_DocCategory,Button_DocCategory,grid:Grid_DocCategory,Label_defaultCategory,Dropdown_defaultCategory,grid:Grid_ReferDoc,Button_ChooseReferDoc,Btn_DelReferDoc,Label_ISOType,"+
-"Button_ISOTypeAdd,grid:Grid_ISOType,lblClause1,grid:Grid_ISOClause,Label_IssueRole,Textbox_RoleName,Btn_IssueRole,Label_IssueUnit,Dropdown_IssueUnits,Textbox_IssueUnitNo,Btn_IssueUnit,"+
-"Textbox_IssueUnitName,grid:Grid_IssueUnit,XC016,Button_IssueUnitDel,grid:Grid_UpperDoc,Button_ChooseUpperDoc,Btn_DelUpperDoc,Label100,ddlVettingUnitType,txtVettingUnitID,txtVettingUnitName,btnVettingUnit,"+
-"Label97,txtPeriod,Label101,Label95,txtVettingNoticeDay,Label104";
+	var tArray=[];
+	/*********區塊移動元件名稱-字串組合*********/
+	var tContactInformationStr1="Label3,Label_DocCategory,Button_DocCategory,grid:Grid_DocCategory,Label_defaultCategory,Dropdown_defaultCategory,grid:Grid_ReferDoc,Button_ChooseReferDoc,Btn_DelReferDoc,Label_ISOType,"+
+	"Button_ISOTypeAdd,grid:Grid_ISOType,lblClause1,grid:Grid_ISOClause,Label_IssueRole,Textbox_RoleName,Btn_IssueRole,Label_IssueUnit,Dropdown_IssueUnits,Textbox_IssueUnitNo,Btn_IssueUnit,"+
+	"Textbox_IssueUnitName,grid:Grid_IssueUnit,XC016,Button_IssueUnitDel,grid:Grid_UpperDoc,Button_ChooseUpperDoc,Btn_DelUpperDoc,Label100,ddlVettingUnitType,txtVettingUnitID,txtVettingUnitName,btnVettingUnit,"+
+	"Label97,txtPeriod,Label101,Label95,txtVettingNoticeDay,Label104";
 
 	tArray[0] = "Block_A" + "," + tContactInformationStr1;
     tArray[0] = tArray[0].split(",");
-return tArray;      
+	
+	return tArray;      
 }
 
 function formCreate(){
+	// alert('formCreate');
 	var tsql = " select OID,id,docServerAddress from DocServer ";
 	var rs = tNaNaConn.query(tsql);
 	var phaseArray=new Array();
@@ -193,14 +197,24 @@ function formCreate(){
 		Grid_DocServerObj.reload(phaseArray);
 		document.getElementById("Grid_DocServer").value=Grid_DocServerObj.toArrayString();
 	}
+	// alert('1');
+
 	var tGridId = Grid_DocServerObj.getId();    
 	var tGridElement_DocServer = document.getElementById(tGridId);   
 	tGridElement_DocServer.style.display="none";   //隱藏
+	// alert('2');
 	document.getElementById("Btn_DocServerAdd").style.display="none";//隱藏
+	// alert('2.1');
 	hideColumnByPrefix(tFormPrefixDocument,"Block_A");
+	document.getElementById(formId + "_shell").style.height = '2190px';
+
 	document.getElementById("Attachment").disabled = false;
-	gDate_setDate.value = systemDateTime;
-return true;
+	// alert('2.2\t' + systemDateTime + '\t' + gDate_SetDate.value);
+	gDate_SetDate.value = systemDateTime;
+	// alert('3');
+
+	setGrid_DocCategory();
+	return true;
 }
 function formOpen(){
 	//為手持裝置新增的按鈕 , 只於手持裝置上操作時會出現  SINCE NANA5.5.2 MODI BY 4182 IN 20121220	
@@ -256,37 +270,17 @@ function formOpen(){
 		gRdoModDocIsNeed.disabled = false;
 		gTxtModDocNo.disabled = false;
 	}
-	
-	gRdoIsVersionAutoGen.disabled=true;
 
-	
-	
-	
-	gDdlRUFactory.disabled=false;
-	gBtnECNNo.disabled=false;
-	gBtnPCB_SBU.disabled=false;
-	gBtnCAR_SBU.disabled=false;
-	//gRdoIsNeed.disabled=false;
-	gTxaUnNessResason.disabled=false;
-	gDropdown_ECNUnit.disabled=false;
-	gDdlECNFactory.disabled=false;
-	gButton_ModECNEdit.disabled=false;
-	
-	gButton_DelUnit.disabled=false;
-	gButton_EditUnit.disabled=false;
-	gButton_EditLeadUnit.disabled=false;
-	gButton_DelLeadUnit.disabled=false;
-	
-	
-	
+	setDisable();
+	init_for_formOpen();
 
-	
-	
 		
 	getRUFactory();
 	//撈取單位主管
 	getManager();
-return true;
+
+	
+	return true;
 }
 
 //少於2位數補零
@@ -298,7 +292,6 @@ function checkTime(i)
 
 function formSave(){
 	if(!formCheck()){
-	
 		return false;
 	}
 	
@@ -369,10 +362,11 @@ function formSave(){
 	
 	document.getElementById("TextArea_ModDocModreason").value = "此文件變更單係由顧客文件審查單自動發起，單號：["+gSerialNumber.value+"]";
 	
-return true;
+	return true;
 }
+
 function formClose(){
-return true;
+	return true;
 }
 
 function formCheck(){
@@ -447,7 +441,7 @@ function formCheck(){
 
 function Button_ModECNDel_onclick(){
 	Grid_ECNModRecordObj.deleteRow();
-	gGrid_ECNModRecord.value =Grid_ECNModRecordObj.toArrayString();
+	gGrid_ECNModRecord.value = Grid_ECNModRecordObj.toArrayString();
 	Grid_ECNModRecordObj.clearBinding();
 }
 
@@ -827,7 +821,7 @@ function checkPointOnClose(pReturnId) {
 			var rs=tNaNaConn.query(tsql);
 			if(rs.length>0){ 
 				gHdnProcessInstOID1.value = rs[0][0];
-				alert(gHdnProcessInstOID1.value);
+				// alert(gHdnProcessInstOID1.value);
 			}			
 		}
 	}
@@ -855,17 +849,24 @@ function btnService_onclick(){
 
 
 //設定相關單位
-function Button_RelatedUnit_onclick(){ //相關單位的開窗
+function Button_RelatedUnit_onclick(){ // 相關單位的開窗
 	if(gDdlRUFactory.value == "$$$$$$"&& gDropdown_RelatedUnits.value=="3"){
 		alert("請選擇廠別資料!!");
 		return false;
 	}
 	if(gDropdown_RelatedUnits.value=="3"){
 		var FileName = "PluralityOpenWin";
+		/*
 		var tsql = " select CustTB.deptId, CustTB.deptName, Groups.id, Groups.groupName,Groups.OID "+
            " from CustFactory_GroupManager CustTB, Groups "+
            " where CustTB.GroupOID = Groups.OID  " +
 		   " and CustTB.factoryId = '"+gHdnRUFactory.value+"'";
+		*/
+		var tsql = " select CustTB.deptId, CustTB.deptName, Groups.id, Groups.groupName,Groups.OID "+
+           " from CustFactory_GroupManager CustTB, Groups "+
+           " where CustTB.GroupOID = Groups.OID ";
+
+		alert('for testing sql: ' + tsql);
 		var SQLClaused = new Array(tsql);
 		var SQLLabel = new Array ("部門代號","部門名稱","對應群組代號","對應群組名稱");
 		var QBEField = new Array("CustTB.deptId","CustTB.deptName","Groups.id","Groups.groupName");
@@ -1196,7 +1197,8 @@ function rdoModDocIsNeed_onclick(){
 
 function btnModDocNo_onclick(){
 
-     openDialog("/NaNaWeb/GP/WMS/ManageDocument/CreateDocument?hdnMethod=chooseModifyDoc&returnField=HdnTextbox_ModDocDocOID", "500", "300", "titlebar,scrollbars,status,resizable");
+	// alert('btnModDocNo_onclick');
+    openDialog("/NaNaWeb/GP/WMS/ManageDocument/CreateDocument?hdnMethod=chooseModifyDoc&returnField=HdnTextbox_ModDocDocOID", "500", "300", "titlebar,scrollbars,status,resizable");
 	// openDialog("/NaNaWeb/GP/WMS/ManageDocument/CreateDocument?hdnMethod=chooseModifyDoc&returnField=HdnTextbox_DocOID", "500", "300", "titlebar,scrollbars,status,resizable");
 
 }
@@ -1427,6 +1429,143 @@ function txtServiceNo_onblur(){
 		alert("查無此員工代號或員工已離職，請重新輸入!!");
 		return false;
 	}
+}
+
+// 2016-03-15 
+function setGrid_DocCategory() {
+	// alert('setGrid_DocCategory');
+	var tSql = "select OID, nameStack from DocCategory where categoryName = '顧客文件'";
+	var rs = tEFGPConn.query(tSql);
+	if(rs.length > 0) {
+		var rs_0 = rs[0][1].replace('~~', '/');
+		rs[0][1] = rs_0;
+		Grid_DocCategoryObj.reload(rs);
+		tGrid_DocCategory.value = Grid_DocCategoryObj.toArrayString();
+	}
+}
+
+// 2016-03-15 
+function Grid_DocCategory_init() {
+	 //取出儲存在隱藏欄位中的Grid資料   
+	var grd_DocCategory_value = tGrid_DocCategory.value;//取出儲存在隱藏欄位中的Grid資料  
+	if(typeof(grd_DocCategory_value) != "undefined"){//判斷grid物件是否存在表單中   
+		if(grd_DocCategory_value.length >1  && (document.getElementById("Grid_DocCategory~~TABLE")==null)){//判斷Grid是否有資料  
+			Grid_DocCategoryObj.reload(eval(grd_DocCategory_value));//若Grid有資料則將存於隱藏中的值載入Grid中   
+		}   
+	}
+}
+
+// 2016-03-15
+function Grid_RelateUnit_init() {
+	//取出儲存在隱藏欄位中的Grid資料   
+	var grd_RelateUnit_value = document.getElementById("Grid_RelateUnit").value;//取出儲存在隱藏欄位中的Grid資料  
+	if(typeof(grd_RelateUnit_value) != "undefined"){//判斷grid物件是否存在表單中   
+		if(grd_RelateUnit_value.length >1  && (document.getElementById("Grid_RelateUnit~~TABLE")==null)){//判斷Grid是否有資料  
+			Grid_RelateUnitObj.reload(eval(grd_RelateUnit_value));//若Grid有資料則將存於隱藏中的值載入Grid中   
+		}   
+	}
+}
+
+// 2016-03-15
+function Grid_LeadUnit_init() {
+	//取出儲存在隱藏欄位中的Grid資料   
+	var grd_LeadUnit_value = document.getElementById("Grid_LeadUnit").value;//取出儲存在隱藏欄位中的Grid資料  
+	if(typeof(grd_LeadUnit_value) != "undefined"){//判斷grid物件是否存在表單中   
+		if(grd_LeadUnit_value.length >1  && (document.getElementById("Grid_LeadUnit~~TABLE")==null)){//判斷Grid是否有資料  
+			Grid_LeadUnitObj.reload(eval(grd_LeadUnit_value));//若Grid有資料則將存於隱藏中的值載入Grid中   
+		}   
+	}	
+}
+
+// 2016-03-15
+function Grid_DocServer_init() {
+	//取出儲存在隱藏欄位中的Grid資料   
+	var grd_DocServer_value = document.getElementById("Grid_DocServer").value;//取出儲存在隱藏欄位中的Grid資料  
+	if(typeof(grd_DocServer_value) != "undefined"){//判斷grid物件是否存在表單中   
+		if(grd_DocServer_value.length >1  && (document.getElementById("Grid_DocServer~~TABLE")==null)){//判斷Grid是否有資料  
+			Grid_DocServerObj.reload(eval(grd_DocServer_value));//若Grid有資料則將存於隱藏中的值載入Grid中   
+		}   
+	}	
+}
+
+// 2016-03-15
+function Grid_ECNModRecord_init() {
+	//取出儲存在隱藏欄位中的Grid資料   
+	var grd_ECNModRecord_value = document.getElementById("Grid_ECNModRecord").value;//取出儲存在隱藏欄位中的Grid資料  
+	if(typeof(grd_ECNModRecord_value) != "undefined"){//判斷grid物件是否存在表單中   
+		if(grd_ECNModRecord_value.length >1  && (document.getElementById("Grid_ECNModRecord~~TABLE")==null)){//判斷Grid是否有資料  
+			Grid_ECNModRecordObj.reload(eval(grd_ECNModRecord_value));//若Grid有資料則將存於隱藏中的值載入Grid中   
+		}   
+	}	
+}
+
+// 2016-03-15
+function Grid_ModDoc_init() {
+	//取出儲存在隱藏欄位中的Grid資料
+	var grd_ModDoc_value = document.getElementById("Grid_ModDoc").value;//取出儲存在隱藏欄位中的Grid資料  
+	if(typeof(grd_ModDoc_value) != "undefined"){//判斷grid物件是否存在表單中   
+		if(grd_ModDoc_value.length >1  && (document.getElementById("Grid_ModDoc~~TABLE")==null)){//判斷Grid是否有資料  
+			Grid_ModDocObj.reload(eval(grd_ModDoc_value));//若Grid有資料則將存於隱藏中的值載入Grid中   
+		}   
+	}
+}
+
+
+// @Deprecated 2016-03-15
+function hideComponents() {
+	// alert('hideComponents');
+	var component_str = "Label3,Label_DocCategory,Button_DocCategory,Label_defaultCategory,Dropdown_defaultCategory,Button_ChooseReferDoc,Btn_DelReferDoc,Label_ISOType,"+
+		"Button_ISOTypeAdd,lblClause1,Label_IssueRole,Textbox_RoleName,Btn_IssueRole,Label_IssueUnit,Dropdown_IssueUnits,Textbox_IssueUnitNo,Btn_IssueUnit,"+
+		"Textbox_IssueUnitName,XC016,Button_IssueUnitDel,Button_ChooseUpperDoc,Btn_DelUpperDoc,Label100,ddlVettingUnitType,txtVettingUnitID,txtVettingUnitName,btnVettingUnit,"+
+		"Label97,txtPeriod,Label101,Label95,txtVettingNoticeDay,Label104";
+
+	// document.getElementById('aw36').style.display = 'none';
+	// alert('Grid_DocCategoryObj.getId(): ' + Grid_DocCategoryObj.getId());
+	document.getElementById(Grid_DocCategoryObj.getId()).style.display = 'none';
+	document.getElementById(Grid_ReferDocObj.getId()).style.display = 'none';
+	document.getElementById(Grid_ISOTypeObj.getId()).style.display = 'none';
+	document.getElementById(Grid_ISOClauseObj.getId()).style.display = 'none';
+	document.getElementById(Grid_IssueUnitObj.getId()).style.display = 'none';
+	document.getElementById(Grid_UpperDocObj.getId()).style.display = 'none';
+
+
+	var components = component_str.split(',');
+	for(var i = 0; i < components.length; i++) {
+		document.getElementById(components[i]).style.display = 'none';
+	}
+}
+
+function init_for_formOpen() {
+	Grid_DocCategory_init();
+	Grid_RelateUnit_init();
+	Grid_LeadUnit_init();
+	Grid_DocServer_init();
+	Grid_ECNModRecord_init();
+	Grid_ModDoc_init();
+
+	if(gHdnPrice.value != '') {
+		gDdlPrice.value = gHdnPrice.value;
+	}
+}
+
+
+function setDisable() {
+	gRdoIsVersionAutoGen.disabled=true;
+	
+	gDdlRUFactory.disabled=false;
+	gBtnECNNo.disabled=false;
+	gBtnPCB_SBU.disabled=false;
+	gBtnCAR_SBU.disabled=false;
+	//gRdoIsNeed.disabled=false;
+	gTxaUnNessResason.disabled=false;
+	gDropdown_ECNUnit.disabled=false;
+	gDdlECNFactory.disabled=false;
+	gButton_ModECNEdit.disabled=false;
+	
+	gButton_DelUnit.disabled=false;
+	gButton_EditUnit.disabled=false;
+	gButton_EditLeadUnit.disabled=false;
+	gButton_DelLeadUnit.disabled=false;
 }
 
 //$-----Auto generated script block, Please do not edit or modify script below this line.-----$//

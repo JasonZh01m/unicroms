@@ -200,7 +200,8 @@ function formCreate(){
 	hideColumnByPrefix(tFormPrefixDocument,"Block_A");
 	document.getElementById("Attachment").disabled = false;
 	gDate_setDate.value = systemDateTime;
-return true;
+	
+	return true;
 }
 function formOpen(){
 	//為手持裝置新增的按鈕 , 只於手持裝置上操作時會出現  SINCE NANA5.5.2 MODI BY 4182 IN 20121220	
