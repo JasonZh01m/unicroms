@@ -81,7 +81,7 @@ var gHdnRUFactoryName = document.getElementById("hdnRUFactoryName");//厂别名�
 var gButton_RelatedUnit = document.getElementById("Button_RelatedUnit");//部门多選開窗
 var gTextbox_RelatedUnitNo = document.getElementById("Textbox_RelatedUnitNo");//部门多選開窗ID
 var gTextbox_RelatedUnitName = document.getElementById("Textbox_RelatedUnitName");//部门多選開窗名称
-var gGrid_RelateUnit = document.getElementById("Grid_RelateUnit");//会签单位grid
+var gGrid_RelateUnit_EFGP = document.getElementById("Grid_RelateUnit_EFGP");//会签单位grid
 var gTxaRelatedUnitReason = document.getElementById("txaRelatedUnitReason");//DCC签核意见
 var gRdoServiceIsAgree = document.getElementById("rdoServiceIsAgree");//客服意见
 var gRdoServiceIsAgree_0 = document.getElementById("rdoServiceIsAgree_0");//客服意见 接受
@@ -179,7 +179,7 @@ function getManager(){
 function getResumptionFormPrefix(){
 	var tArray=[];
 	/*********區塊移動元件名稱-字串組合*********/
-	var tContactInformationStr1="Label3,Label_DocCategory,Button_DocCategory,grid:Grid_DocCategory,Label_defaultCategory,Dropdown_defaultCategory,grid:Grid_ReferDoc,Button_ChooseReferDoc,Btn_DelReferDoc,Label_ISOType,"+
+	var tContactInformationStr1="Label3,Label_DocCategory,Button_DocCategory,grid:Grid_DocCategory,grid:Grid_RelateUnit,Label_defaultCategory,Dropdown_defaultCategory,grid:Grid_ReferDoc,Button_ChooseReferDoc,Btn_DelReferDoc,Label_ISOType,"+
 	"Button_ISOTypeAdd,grid:Grid_ISOType,lblClause1,grid:Grid_ISOClause,Label_IssueRole,Textbox_RoleName,Btn_IssueRole,Label_IssueUnit,Dropdown_IssueUnits,Textbox_IssueUnitNo,Btn_IssueUnit,"+
 	"Textbox_IssueUnitName,grid:Grid_IssueUnit,XC016,Button_IssueUnitDel,grid:Grid_UpperDoc,Button_ChooseUpperDoc,Btn_DelUpperDoc,Label100,ddlVettingUnitType,txtVettingUnitID,txtVettingUnitName,btnVettingUnit,"+
 	"Label97,txtPeriod,Label101,Label95,txtVettingNoticeDay,Label104";
@@ -266,6 +266,9 @@ function formOpen(){
 		gBtnCAR_SBU.disabled=false;
 		//gRdoIsNeed.disabled=false;
 		gTxaUnNessResason.disabled=false;
+		gTxaUnNessResason.readonly=false;
+		// gTxaUnNessResason.value = "test gTxaUnNessResason";
+
 		gDropdown_ECNUnit.disabled=false;
 		gDdlECNFactory.disabled=false;
 		// gDropdown_ECNUnit.disabled = false;
@@ -275,15 +278,21 @@ function formOpen(){
 		tButton_ModDocEdit.disabled = false;
 		tButton_ModDocDel.disabled = false;
 
+		gRdoIsNeed_0.disabled = false;
+		gRdoIsNeed_1.disabled = false;
+
 	}
 	if(activityId=="RelateUnits"){
+		// alert('activityId is RelateUnits');
 		gTxtCustDocOwner.value = userId;
 		gTxtCustDocOwnerName.value = userName;
 		gHdnCustDocOwnerOID.value = userOID;
 		gButton_ModECNAdd.disabled=false;
 		gButton_ModECNDel.disabled=false;
 		// gRdoModDocIsNeed.disabled = false;
-
+		// alert('gTxtCustDocOwner: ' + gTxtCustDocOwner.value + ' ' +
+		// 		'gTxtCustDocOwnerName: ' + gTxtCustDocOwnerName.value + ' ' +
+		// 		'gHdnCustDocOwnerOID: ' + gHdnCustDocOwnerOID.value + ' ');
 		gTxtModDocNo.disabled = false;
 		
 	}
@@ -306,7 +315,7 @@ function formOpen(){
 		gRdoServiceIsAgree_1.disabled = false;
 		gRdoServiceIsAgree_2.disabled = false;
 
-		gTxaServiceReply.readonly = false;
+		// gTxaServiceReply.readonly = false;
 		// gTxaServiceReply.readOnly = false;
 		// gTxaServiceReply.value = "test";
 		// gTxaServiceReply.innerHTML = "test";
@@ -386,6 +395,9 @@ function formSave(){
 		}else{
 			gHdnECNOwners.value = userNo;
 		}
+
+		setGrid_RelateUnit();
+
 	}
 	
 	if(activityId=="RelateUnits"){
@@ -432,12 +444,12 @@ function formSave(){
 }
 
 function formSave_end() {
-	var grid_RelateUnitData = Grid_RelateUnitObj.getData();
-	// alert('formSave_end\n' + tGrid_RelateUnitData);
+	var grid_RelateUnit_EFGPData = Grid_RelateUnit_EFGPObj.getData();
+	// alert('formSave_end\n' + tGrid_RelateUnit_EFGPData);
 	var grdUsers_t = '';
-   	for(var i = 0; i < grid_RelateUnitData.length; i++) {
-   		// alert(grid_RelateUnitData[i][6]);
-   		grdUsers_t += grid_RelateUnitData[i][6];
+   	for(var i = 0; i < grid_RelateUnit_EFGPData.length; i++) {
+   		// alert(grid_RelateUnit_EFGPData[i][6]);
+   		grdUsers_t += grid_RelateUnit_EFGPData[i][6];
    	}
    	gHdnTextbox_RelatedDep.value = grdUsers_t;
    	// alert('gHdnTextbox_RelatedDep.value: ' + gHdnTextbox_RelatedDep.value);
@@ -490,7 +502,7 @@ function formCheck(){
 	if(gRdoImportant_0.checked==false&&gRdoImportant_1.checked==false){
 		msg+="請選擇會簽時效!!\n";
 	}
-	var grdRelateUnit = Grid_RelateUnitObj.getData();
+	var grdRelateUnit = Grid_RelateUnit_EFGPObj.getData();
 	if(grdRelateUnit.length<=0){
 		msg+="請選擇會簽單位!!\n";
 	}
@@ -572,6 +584,7 @@ function Button_ModECNEdit_onclick(){
 		Grid_ECNModRecordObj.editRow();
 		gGrid_ECNModRecord.value =Grid_ECNModRecordObj.toArrayString();
 		Grid_ECNModRecordObj.clearBinding();
+		resetRdoIsNeed();
 	}
 }
 
@@ -609,6 +622,7 @@ function Button_ModECNAdd_onclick(){
 		Grid_ECNModRecordObj.addRow();
 		gGrid_ECNModRecord.value =Grid_ECNModRecordObj.toArrayString();
 		Grid_ECNModRecordObj.clearBinding();
+		resetRdoIsNeed();
 	}
 }
 
@@ -711,8 +725,8 @@ function btnECNNo_onclick(){
 
 //主導部門新增
 function Button_EditLeadUnit_onclick(){
-	var grdRelateUnitData = Grid_RelateUnitObj.getData();
-	var tIndex = Grid_RelateUnitObj.getSelectionProperty("index");
+	var grdRelateUnitData = Grid_RelateUnit_EFGPObj.getData();
+	var tIndex = Grid_RelateUnit_EFGPObj.getSelectionProperty("index");
 	var grdLeadUnitData = Grid_LeadUnitObj.toArrayString();
 	var tGridDtl = "";
 	var tDel = grdLeadUnitData.substring(0,grdLeadUnitData.lastIndexOf("]")); 
@@ -770,7 +784,7 @@ function txaRelatedUnitReason_onblur(){
 }
 
 function btnRelateUnitOpen_onClick(){
-	FormdisplayGridCtrl(Grid_RelateUnitObj,document.getElementById("btnRelateUnitOpen"));
+	FormdisplayGridCtrl(Grid_RelateUnit_EFGPObj,document.getElementById("btnRelateUnitOpen"));
 }
 
 
@@ -778,9 +792,9 @@ function Button_EditUnit_onclick(){                      //更新
 	if(!(checkFinish("Textbox_RelatedUnitNo","相關單位","",""))){
 		return false;
 	}
-	Grid_RelateUnitObj.editRow();  //將Binding欄位的資料填入Grid中 
-	Grid_RelateUnitObj.clearBinding();  //新增後清除Binding欄位資料   
-	document.getElementById("Grid_RelateUnit").value = Grid_RelateUnitObj.toArrayString();  //將新的資料存入Grid隱藏欄位中
+	Grid_RelateUnit_EFGPObj.editRow();  //將Binding欄位的資料填入Grid中 
+	Grid_RelateUnit_EFGPObj.clearBinding();  //新增後清除Binding欄位資料   
+	document.getElementById("Grid_RelateUnit_EFGP").value = Grid_RelateUnit_EFGPObj.toArrayString();  //將新的資料存入Grid隱藏欄位中
 	
 	document.getElementById("Textbox_RelatedUnitNo").value="";
 	document.getElementById("Textbox_RelatedUnitName").value="";
@@ -792,9 +806,9 @@ function Button_EditUnit_onclick(){                      //更新
 }
 
 function Button_DelUnit_onclick(){                      //刪除
-	Grid_RelateUnitObj.deleteRow();
-	document.getElementById("Grid_RelateUnit").value = Grid_RelateUnitObj.toArrayString();//將新的資料存入Grid隱藏欄位中
-	Grid_RelateUnitObj.clearBinding();
+	Grid_RelateUnit_EFGPObj.deleteRow();
+	document.getElementById("Grid_RelateUnit_EFGP").value = Grid_RelateUnit_EFGPObj.toArrayString();//將新的資料存入Grid隱藏欄位中
+	Grid_RelateUnit_EFGPObj.clearBinding();
 	
 	document.getElementById("Textbox_RelatedUnitNo").value="";
 	document.getElementById("Textbox_RelatedUnitName").value="";
@@ -807,13 +821,13 @@ function Button_DelUnit_onclick(){                      //刪除
 
 function Button_AddUnit_onclick(){                    //新增
 	// alert('Button_AddUnit_onclick');
-	// alert(Grid_RelateUnitObj.getData());
+	// alert(Grid_RelateUnit_EFGPObj.getData());
 	if(gTextbox_RelatedUnitNo.value==""||gTextbox_RelatedUnitName.value==""){
 		alert("會簽部門不能爲空！！");
 		return false;
 	}
-	Grid_RelateUnitObj.addRow();
-	document.getElementById("Grid_RelateUnit").value = Grid_RelateUnitObj.toArrayString();//將新的資料存入Grid隱藏欄位中
+	Grid_RelateUnit_EFGPObj.addRow();
+	document.getElementById("Grid_RelateUnit_EFGP").value = Grid_RelateUnit_EFGPObj.toArrayString();//將新的資料存入Grid隱藏欄位中
 	document.getElementById("Textbox_RelatedUnitNo").value="";
 	document.getElementById("Textbox_RelatedUnitName").value="";
 	document.getElementById("HdnTextbox_RelatedUnit").value="";
@@ -841,7 +855,7 @@ function checkPointOnClose(pReturnId) {
 	//当关闭的开窗为相關單位开窗时，多筆欄位格式：name,name,name
 	if(pReturnId == "Textbox_RelatedUnitNo"){
 		// alert('checkPointOnClose return relatedUnitNo');
-		// alert(Grid_RelateUnitObj.getData());
+		// alert(Grid_RelateUnit_EFGPObj.getData());
 		var strUnitNo="";
 		var strUnitName="";
 		var strGrpId="";
@@ -888,7 +902,7 @@ function checkPointOnClose(pReturnId) {
 		}
 		
 		
-		var grdRelateUnit = Grid_RelateUnitObj.getData();
+		var grdRelateUnit = Grid_RelateUnit_EFGPObj.getData();
 		if(grdRelateUnit.length >0){
 			for(var i=0;i<grdRelateUnit.length;i++){
 				if(grdRelateUnit[i][0]==gDdlRUFactory.value){
@@ -1268,7 +1282,7 @@ function addInputLabel_Unit(unitfor) {
 		  //Button_AddUnit_onclick(); 
      }
     }
-	  Grid_RelateUnitObj.clearBinding(); 
+	  Grid_RelateUnit_EFGPObj.clearBinding(); 
 	  document.getElementById("Dropdown_RelatedUnits").value =1;
 	}else if(unitfor=="Textbox_RoleName"){	
 	  document.getElementById("HdnTextbox_RoleOID").value = tHiddenValue;
@@ -1319,7 +1333,7 @@ function rdoModDocIsNeed_onclick(){
 
 function btnModDocNo_onclick(){
 
-	// alert('btnModDocNo_onclick');
+	alert('btnModDocNo_onclick');
     openDialog("/NaNaWeb/GP/WMS/ManageDocument/CreateDocument?hdnMethod=chooseModifyDoc&returnField=HdnTextbox_ModDocDocOID", "500", "300", "titlebar,scrollbars,status,resizable");
     // openDialog("/NaNaWeb/GP/WMS/ManageDocument/CreateDocument?hdnMethod=chooseModifyDoc&returnField=hdnModDocOID", "500", "300", "titlebar,scrollbars,status,resizable");
 	// openDialog("/NaNaWeb/GP/WMS/ManageDocument/CreateDocument?hdnMethod=chooseModifyDoc&returnField=HdnTextbox_DocOID", "500", "300", "titlebar,scrollbars,status,resizable");
@@ -1332,8 +1346,9 @@ function btnModDocNo_onclick(){
  	// alert('Textbox_DocNo_onchange2');
 
 	var docOID=eval(document.getElementById("HdnTextbox_ModDocDocOID").value);
+	alert('docOID\n' + docOID);
 	tHdnModDocOID.value = docOID[0][4];
-	alert("tHdnModDocOID.value=" + tHdnModDocOID.value);
+	// alert("tHdnModDocOID.value=" + tHdnModDocOID.value);
 	// if(activityId == "Requester"){
 		DWREngine.setAsync(false);//開啟Ajax同步
 		ajax_IsoModuleAccessor.getDocumentDTOByOID(docOID[0][0],false,"Last",loadDocReq);
@@ -1430,9 +1445,9 @@ function Button_ModDocAdd_onclick() {
 	if(document.getElementById("ModDoc_AbortDate").value == ""){
 		msg+='尚未設定工作行事曆，請聯繫資訊部相關人員處理!!\n';
 	}
-	alert('finish abort date');
+	// alert('finish abort date');
 	if(msg!=""){
-		alert(msg);
+		// alert(msg);
 		return false;
 	}else{
 		var sql = "select DocCmItem_Category.CategoryOID " +
@@ -1448,10 +1463,11 @@ function Button_ModDocAdd_onclick() {
 			ajax_get2ndCategoryOID.get2ndCategorybyOID(rs[0][0], loadQuery);
 			DWREngine.setAsync(true);
 		}
-		alert('phase 2');
+		// alert('phase 2');
 		Grid_ModDocObj.addRow();
 		gGrid_ModDoc.value = Grid_ModDocObj.toArrayString();
 		Grid_ModDocObj.clearBinding();
+		resetRdoModDocIsNeed();
 	}
 }
 
@@ -1493,7 +1509,7 @@ function Button_ModDocEdit_onclick() {
 			"from Documents, ISODocCmItem, DocCmItem_Category " +
 			"where Documents.containerOID = ISODocCmItem.OID " +
 			"and ISODocCmItem.OID = DocCmItem_Category.DocCmItemOID " +
-			"and Documents.OID ='" + document.getElementById('HdnTextbox_ModDocDocOID').value + "'";
+			"and Documents.OID ='" + tHdnModDocOID.value + "'";
 		var rs = tNaNaConn.query(sql);
 		if (rs.length > 0) {
 			DWREngine.setAsync(false);
@@ -1503,6 +1519,7 @@ function Button_ModDocEdit_onclick() {
 		Grid_ModDocObj.editRow();
 		gGrid_ModDoc.value =Grid_ModDocObj.toArrayString();
 		Grid_ModDocObj.clearBinding();
+		resetRdoModDocIsNeed();
 	}
 }
 
@@ -1543,14 +1560,28 @@ function loadWorkingDay(data) {
 	document.getElementById("ModDoc_AbortDate").value = data;
 }
 
-function rdoModDocIsNeed_onclick(){
+/*function rdoModDocIsNeed_onclick(){
 	if(gRdoModDocIsNeed_1.checked==true){
 		alert("警告！\n請詳述不需要之理由，嚴禁僅用'NA'字眼描述！");
 		gHdnModDocIsNeed.value = "N";
 	}else{
 		gHdnModDocIsNeed.value = "Y";
 	}
+}*/
+
+function resetRdoModDocIsNeed() {
+	alert('resetRdoModDocIsNeed');
+	gRdoModDocIsNeed_0.checked = false;
+	gRdoModDocIsNeed_1.checked = false;
 }
+
+function resetRdoIsNeed() {
+	// alert('resetRdoIsNeed');
+	gRdoIsNeed_0.checked = false;
+	gRdoIsNeed_1.checked = false;
+}
+
+
 
 function txtServiceNo_onblur(){
 	var ServiceNo = gTxtServiceNo.value;
@@ -1591,12 +1622,12 @@ function Grid_DocCategory_init() {
 }
 
 // 2016-03-15
-function Grid_RelateUnit_init() {
+function Grid_RelateUnit_EFGP_init() {
 	//取出儲存在隱藏欄位中的Grid資料   
-	var grd_RelateUnit_value = document.getElementById("Grid_RelateUnit").value;//取出儲存在隱藏欄位中的Grid資料  
-	if(typeof(grd_RelateUnit_value) != "undefined"){//判斷grid物件是否存在表單中   
-		if(grd_RelateUnit_value.length >1  && (document.getElementById("Grid_RelateUnit~~TABLE")==null)){//判斷Grid是否有資料  
-			Grid_RelateUnitObj.reload(eval(grd_RelateUnit_value));//若Grid有資料則將存於隱藏中的值載入Grid中   
+	var grd_RelateUnit_EFGP_value = document.getElementById("Grid_RelateUnit_EFGP").value;//取出儲存在隱藏欄位中的Grid資料  
+	if(typeof(grd_RelateUnit_EFGP_value) != "undefined"){//判斷grid物件是否存在表單中   
+		if(grd_RelateUnit_EFGP_value.length >1  && (document.getElementById("Grid_RelateUnit_EFGP~~TABLE")==null)){//判斷Grid是否有資料  
+			Grid_RelateUnit_EFGPObj.reload(eval(grd_RelateUnit_EFGP_value));//若Grid有資料則將存於隱藏中的值載入Grid中   
 		}   
 	}
 }
@@ -1673,6 +1704,7 @@ function hideComponents() {
 // 2016-03-16
 function init_for_formOpen() {
 	Grid_DocCategory_init();
+	Grid_RelateUnit_EFGP_init();
 	Grid_RelateUnit_init();
 	Grid_LeadUnit_init();
 	Grid_DocServer_init();
@@ -1697,7 +1729,10 @@ function setDisable() {
 	gRdoServiceIsAgree_1.disabled = true;
 	gRdoServiceIsAgree_2.disabled = true;
 
-	gTxaServiceReply.readOnly = true;
+	gRdoIsNeed_0.disabled = true;
+	gRdoIsNeed_1.disabled = true;
+
+	// gTxaServiceReply.readOnly = true;
 	
 	gDdlRUFactory.disabled=false;
 	gBtnECNNo.disabled=false;
@@ -1741,5 +1776,39 @@ function setRdoModDocIsNeedDisable(pFlag) {
 	}
 	
 }
+
+function setGrid_RelateUnit() {
+	alert('setGrid_RelateUnit');
+	var gRelateUnit_EFGP = Grid_RelateUnit_EFGPObj.getData();
+	var arr2 = [];
+	if(gRelateUnit_EFGP.length >0){
+		for(var i=0;i<gRelateUnit_EFGP.length;i++){
+			var arr = [];
+			arr[0] = gRelateUnit_EFGP[i][2];
+			arr[1] = gRelateUnit_EFGP[i][3];
+			arr[2] = gRelateUnit_EFGP[i][4];
+			arr[3] = gRelateUnit_EFGP[i][5];
+			arr[4] = gRelateUnit_EFGP[i][6];
+
+			arr2[i] = arr;
+		}
+		Grid_RelateUnitObj.reload(arr2);
+	}
+
+	document.getElementById("Grid_RelateUnit").value = Grid_RelateUnitObj.toArrayString();  //將新的資料存入Grid隱藏欄位中
+	alert('Grid_RelateUnit.value:' + document.getElementById("Grid_RelateUnit").value);
+}
+
+// 2016-03-15
+function Grid_RelateUnit_init() {
+	//取出儲存在隱藏欄位中的Grid資料   
+	var grd_RelateUnit_value = document.getElementById("Grid_RelateUnit").value;//取出儲存在隱藏欄位中的Grid資料  
+	if(typeof(grd_RelateUnit_value) != "undefined"){//判斷grid物件是否存在表單中   
+		if(grd_RelateUnit_value.length >1  && (document.getElementById("Grid_RelateUnit~~TABLE")==null)){//判斷Grid是否有資料  
+			Grid_RelateUnitObj.reload(eval(grd_RelateUnit_value));//若Grid有資料則將存於隱藏中的值載入Grid中   
+		}   
+	}
+}
+
 
 //$-----Auto generated script block, Please do not edit or modify script below this line.-----$//
