@@ -155,6 +155,16 @@ var gTxaServiceReply = document.getElementById('txaServiceReply'); // 客服意�
 var tModDocProInstSN = document.getElementById('ModDocProInstSN');
 var tHdnModDocOID = document.getElementById('hdnModDocOID');
 
+
+var hdnCustDocOwnerOID_restore = '';
+var txtCustDocOwner_restore = '';
+var txtCustDocOwnerName_restore = '';
+var hdnModInvoke_restore = '';
+var hdnPrice_restore = '';
+var hdnModDocDCCGroups_restore = '';
+var allPowerLevel = "";
+
+
 //取得使用者上級單位
 function getManager(){
 	if(gInputLabel_Author_txt.value !=""){
@@ -287,7 +297,13 @@ function formOpen(){
 		gTxtCustDocOwner.value = userId;
 		gTxtCustDocOwnerName.value = userName;
 		gHdnCustDocOwnerOID.value = userOID;
+
+		// alert('gTxtCustDocOwner: ' + gTxtCustDocOwner.value + ' ' +
+		// 		'gTxtCustDocOwnerName: ' + gTxtCustDocOwnerName.value + ' ' +
+		// 		'gHdnCustDocOwnerOID: ' + gHdnCustDocOwnerOID.value + ' ');
+
 		gButton_ModECNAdd.disabled=false;
+		// gButton_ModDocEdit.disabled=false;
 		gButton_ModECNDel.disabled=false;
 		// gRdoModDocIsNeed.disabled = false;
 		// alert('gTxtCustDocOwner: ' + gTxtCustDocOwner.value + ' ' +
@@ -302,6 +318,16 @@ function formOpen(){
 		gTxtModDocNo.disabled = false;
 	}
 
+	//載入機密等級、權限屬性
+	DWREngine.setAsync(false);
+	getAllPowerLevel();
+	// getAllAccessRights();
+	DWREngine.setAsync(true);
+	document.getElementById("Dropdown_PowerLevel").value = document.getElementById("Hdn_PowerLevel").value;
+	if (activityId == "Requester") {
+		document.getElementById("Dropdown_PowerLevel").value = "8a8dc21d513e248d01514375aad00001";
+		document.getElementById("Hdn_PowerLevel").value = document.getElementById("Dropdown_PowerLevel").value;
+	}
 
 	// test
 	// gTxaServiceReply.value = "test";
@@ -348,6 +374,8 @@ function formOpen(){
 	document.getElementById("Attachment").disabled = false;
 	// 2016-03-16 move from formCreate
 
+	document.getElementById('hdnModInvoke').value = 'Y'; // 预设值为Y
+
 
 	return true;
 }
@@ -377,7 +405,23 @@ function formSave(){
 		//ex.2016/01/11 10:58:55
 		gHdnSaveDate.value=systemDateTime+" "+time.getHours()+":"+time.getMinutes()+":"+time.getSeconds();
 		//alert("gHdnSaveDate="+gHdnSaveDate.value);
+		//取得填單人之工作日期
+		var workDays = "";
+		if(gRdoImportant_0.checked==true){
+			workDays = 1;
+		}else if(gRdoImportant_1.checked==true){
+			workDays = 3;
+		}
+		
+		// alert("userOID="+userOID+" ,gHdnSaveDate="+gHdnSaveDate.value+" ,workDays="+workDays);
+		ajax_OrgAccessor.fetchWorkDate(userOID,gHdnSaveDate.value,workDays,function(data){
+			gHdnLimitDate.value = data;
+			// alert('formsave.. data: ' + data);
+		});
+
 	}
+
+
 	
 	
 	
@@ -420,19 +464,6 @@ function formSave(){
 		
 	}
 	
-	//取得填單人之工作日期
-	var workDays = "";
-	if(gRdoImportant_0.checked==true){
-		workDays = 1;
-	}else if(gRdoImportant_1.checked==true){
-		workDays = 3;
-	}
-	
-	// alert("userOID="+userOID+" ,gHdnSaveDate="+gHdnSaveDate.value+" ,workDays="+workDays);
-	ajax_OrgAccessor.fetchWorkDate(userOID,gHdnSaveDate.value,workDays,function(data){
-		gHdnLimitDate = data;
-		alert('formsave.. data: ' + data);
-	});
 	
 	document.getElementById("TextArea_ModDocModreason").value = "此文件變更單係由顧客文件審查單自動發起，單號：["+gSerialNumber.value+"]";
 	
@@ -534,7 +565,9 @@ function formCheck(){
 function Button_ModECNDel_onclick(){
 	Grid_ECNModRecordObj.deleteRow();
 	gGrid_ECNModRecord.value = Grid_ECNModRecordObj.toArrayString();
+	storeNoNeedToClear_forGrid_ECNModRecord();
 	Grid_ECNModRecordObj.clearBinding();
+	revertNoNeedToClear_forGrid_ECNModRecord();
 }
 
 function Button_ModECNEdit_onclick(){
@@ -583,7 +616,9 @@ function Button_ModECNEdit_onclick(){
 	}else{
 		Grid_ECNModRecordObj.editRow();
 		gGrid_ECNModRecord.value =Grid_ECNModRecordObj.toArrayString();
+		storeNoNeedToClear_forGrid_ECNModRecord();
 		Grid_ECNModRecordObj.clearBinding();
+		revertNoNeedToClear_forGrid_ECNModRecord();
 		resetRdoIsNeed();
 	}
 }
@@ -621,7 +656,9 @@ function Button_ModECNAdd_onclick(){
 	}else{
 		Grid_ECNModRecordObj.addRow();
 		gGrid_ECNModRecord.value =Grid_ECNModRecordObj.toArrayString();
+		storeNoNeedToClear_forGrid_ECNModRecord();
 		Grid_ECNModRecordObj.clearBinding();
+		revertNoNeedToClear_forGrid_ECNModRecord();
 		resetRdoIsNeed();
 	}
 }
@@ -828,10 +865,11 @@ function Button_AddUnit_onclick(){                    //新增
 	}
 	Grid_RelateUnit_EFGPObj.addRow();
 	document.getElementById("Grid_RelateUnit_EFGP").value = Grid_RelateUnit_EFGPObj.toArrayString();//將新的資料存入Grid隱藏欄位中
-	document.getElementById("Textbox_RelatedUnitNo").value="";
-	document.getElementById("Textbox_RelatedUnitName").value="";
-	document.getElementById("HdnTextbox_RelatedUnit").value="";
-	document.getElementById("HdnTextbox_UnitUsers").value="";
+	// document.getElementById("Textbox_RelatedUnitNo").value="";
+	// document.getElementById("Textbox_RelatedUnitName").value="";
+	// document.getElementById("HdnTextbox_RelatedUnit").value="";
+	// document.getElementById("HdnTextbox_UnitUsers").value="";
+	Grid_RelateUnit_EFGPObj.clearBinding();
 	document.getElementById("Dropdown_RelatedUnits").value ="3";
 	document.getElementById("ddlRUFactory").value ="$$$$$$";
 }
@@ -862,59 +900,104 @@ function checkPointOnClose(pReturnId) {
 		var strGrpName="";
 		var strGrpOID="";
 		var selectvalue =  document.getElementById("Textbox_RelatedUnitNo").value;
-		if(selectvalue!="" && selectvalue !="[]"){
-			selectvalue = eval(selectvalue);
-			for(var i = 0 ; i < selectvalue.length; i++){
-				strUnitNo += selectvalue[i][1]+";";
-				strUnitName += selectvalue[i][2]+";";
-				strGrpId += selectvalue[i][3]+";";
-				strGrpName += selectvalue[i][4]+";";
-				strGrpOID += selectvalue[i][5]+";";
-			}
-			//document.getElementById("Textbox_RelatedUnitNo").value=strUnitNo.substring(0,strMember.lastIndexOf(","));
-			//document.getElementById("Textbox_RelatedUnitName").value=strUnitName.substring(0,strMember.lastIndexOf(","));
+
+
+		if(selectvalue=="" || selectvalue =="[]"){
+			return false;
+		}
+
+		var selectvalueArr = eval(selectvalue);
+
+		// alert('selectvalueArr.length: ' + selectvalueArr.length);
+		var newArr2 = [];
+		for(var i = 0 ; i < selectvalueArr.length; i++){
+			strUnitNo = selectvalueArr[i][1];
+			strUnitName = selectvalueArr[i][2];
+			strGrpId = selectvalueArr[i][3];
+			strGrpName = selectvalueArr[i][4];
+			strGrpOID = selectvalueArr[i][5];
+
+			// alert('strGrpId:' + strGrpId + ' ' +
+			// 	'strGrpName:' + strGrpName + ' ' +
+			// 	'strGrpOID:' + strGrpOID + ' ');
 			document.getElementById("Textbox_RelatedUnitNo").value=strGrpId;
 			document.getElementById("Textbox_RelatedUnitName").value=strGrpName;
 			document.getElementById("HdnTextbox_RelatedUnit").value=strGrpOID;
-		}
-		var tsql = " select Users.id,Users.userName from Users "+
-			" join Group_User on Users.OID = Group_User.UserOID "+
-			" join Groups on Group_User.GroupOID = Groups.OID "+
-			" where GroupOID in(";
-		var strGrpOID2 = strGrpOID.substring(0,strGrpOID.length-1);//去除最後一個分號
-		var str = strGrpOID2.split(";");
-		var strId = "";
-		for(var i = 0 ; i < str.length; i++){
-				strId += "'" +str[i]+ "',";
-			}
-		tsql += strId.substring(0,strId.lastIndexOf(","))+") ";
-		var rs=tNaNaConn.query(tsql);
-		var strUser="";
-		if(rs.length>0){  
-			for(var i = 0 ; i < rs.length ; i ++)
-			strUser+=rs[i][0]+";";
-		}
-		document.getElementById("HdnTextbox_UnitUsers").value=strUser;
-		//新增
-		if(gTextbox_RelatedUnitNo.value==""||gTextbox_RelatedUnitName.value==""){
-			alert("會簽部門不能爲空！！");
-			return false;
-		}
-		
-		
-		var grdRelateUnit = Grid_RelateUnit_EFGPObj.getData();
-		if(grdRelateUnit.length >0){
-			for(var i=0;i<grdRelateUnit.length;i++){
-				if(grdRelateUnit[i][0]==gDdlRUFactory.value){
-					alert("此單位已存在！");
-						return false;
 
+			var tsql = " select Users.id,Users.userName from Users "+
+				" join Group_User on Users.OID = Group_User.UserOID "+
+				" join Groups on Group_User.GroupOID = Groups.OID "+
+				" where GroupOID = '" + strGrpOID + "'";
+			// alert('tsql: ' + tsql);
+			var rs=tNaNaConn.query(tsql);
+			var strUser="";
+			if(rs.length>0){  
+				for(var j = 0 ; j < rs.length ; j ++)
+				strUser+=rs[j][0]+";";
+			}
+			document.getElementById("HdnTextbox_UnitUsers").value=strUser;
+
+
+			var newArr = [];
+			newArr[0] = document.getElementById('hdnRUFactory').value;
+			newArr[1] = document.getElementById('hdnRUFactoryName').value;
+			newArr[2] = document.getElementById('Textbox_RelatedUnitNo').value;
+			newArr[3] = document.getElementById('Textbox_RelatedUnitName').value;
+			newArr[4] = document.getElementById('Dropdown_RelatedUnits').value;
+			newArr[5] = document.getElementById('HdnTextbox_RelatedUnit').value;
+			newArr[6] = document.getElementById('HdnTextbox_UnitUsers').value;
+
+			newArr2[i] = newArr;
+
+		}
+
+			// alert("newArr2.length\n" + newArr2.length);
+
+			var tGrid_RelateUnit_EFGPData = Grid_RelateUnit_EFGPObj.getData();
+			// alert('tGrid_RelateUnit_EFGPData\n' + tGrid_RelateUnit_EFGPData);
+
+			for(var i = 0; i < tGrid_RelateUnit_EFGPData.length; i++) {
+				for(j = 0; j < newArr2.length; j++) {
+					if(tGrid_RelateUnit_EFGPData[i][0] == newArr2[j][0] || tGrid_RelateUnit_EFGPData[i][4] == newArr2[j][4] || tGrid_RelateUnit_EFGPData[i][5] == newArr2[j][5]) {
+						alert("此單位已存在！");
+						return false;
+					}
 				}
 			}
-		}
-		Button_AddUnit_onclick();//加入到Grid中
-		
-	}
+
+			if(newArr2.length > 0) {
+				for(var i = 0; i < newArr2.length; i++) {
+					tGrid_RelateUnit_EFGPData[tGrid_RelateUnit_EFGPData.length] = newArr2[i];
+				}
+			}
+			// alert('tGrid_RelateUnit_EFGPData\n' + tGrid_RelateUnit_EFGPData);
+			Grid_RelateUnit_EFGPObj.reload(tGrid_RelateUnit_EFGPData);
+			document.getElementById("Grid_RelateUnit_EFGP").value = Grid_RelateUnit_EFGPObj.toArrayString();
+
+			// Grid_RelateUnit_EFGPObj.addRow();
+
+			//新增
+			// if(gTextbox_RelatedUnitNo.value==""||gTextbox_RelatedUnitName.value==""){
+			// 	alert("會簽部門不能爲空！！");
+			// 	return false;
+			// }
+			
+			
+			// var grdRelateUnit = Grid_RelateUnit_EFGPObj.getData();
+			// if(grdRelateUnit.length >0){
+			// 	for(var i=0;i<grdRelateUnit.length;i++){
+			// 		if(grdRelateUnit[i][0]==gDdlRUFactory.value){
+			// 			alert("此單位已存在！");
+			// 			return false;
+
+			// 		}
+			// 	}
+			// }
+			// Button_AddUnit_onclick();//加入到Grid中
+
+
+		// } // for(var i = end 
+	}	// if(pReturnId end
 	
 	if(pReturnId == "txtECNNo"){
 		if(gDdlPrice.value =="Carrier"){
@@ -954,6 +1037,7 @@ function btnService_onclick(){
 
 //設定相關單位
 function Button_RelatedUnit_onclick(){ // 相關單位的開窗
+	// alert('Button_RelatedUnit_onclick');
 	if(gDdlRUFactory.value == "$$$$$$"&& gDropdown_RelatedUnits.value=="3"){
 		alert("請選擇廠別資料!!");
 		return false;
@@ -1021,7 +1105,7 @@ function changeUser(){
 function Dropdown_RelatedUnits_onchange(){
 	if(document.getElementById("Dropdown_RelatedUnits").value == "4"){
 		document.getElementById("ddlRUFactory").disabled = true;
-	}else{
+	} else{
 		document.getElementById("ddlRUFactory").disabled = false;
 	}
 	document.getElementById("ddlRUFactory").value = "$$$$$$";
@@ -1333,7 +1417,7 @@ function rdoModDocIsNeed_onclick(){
 
 function btnModDocNo_onclick(){
 
-	alert('btnModDocNo_onclick');
+	// alert('btnModDocNo_onclick');
     openDialog("/NaNaWeb/GP/WMS/ManageDocument/CreateDocument?hdnMethod=chooseModifyDoc&returnField=HdnTextbox_ModDocDocOID", "500", "300", "titlebar,scrollbars,status,resizable");
     // openDialog("/NaNaWeb/GP/WMS/ManageDocument/CreateDocument?hdnMethod=chooseModifyDoc&returnField=hdnModDocOID", "500", "300", "titlebar,scrollbars,status,resizable");
 	// openDialog("/NaNaWeb/GP/WMS/ManageDocument/CreateDocument?hdnMethod=chooseModifyDoc&returnField=HdnTextbox_DocOID", "500", "300", "titlebar,scrollbars,status,resizable");
@@ -1346,7 +1430,8 @@ function btnModDocNo_onclick(){
  	// alert('Textbox_DocNo_onchange2');
 
 	var docOID=eval(document.getElementById("HdnTextbox_ModDocDocOID").value);
-	alert('docOID\n' + docOID);
+
+	// alert('docOID\n' + docOID);
 	tHdnModDocOID.value = docOID[0][4];
 	// alert("tHdnModDocOID.value=" + tHdnModDocOID.value);
 	// if(activityId == "Requester"){
@@ -1396,13 +1481,57 @@ function updateSelectedDocumentList() {
 //grid單擊事件
 function gridRowClick(pGridId){
 	//會簽單位
-	if(pGridId=="aw38"){
+	if (pGridId == Grid_RelateUnit_EFGPObj.getId()) {
+		var grid_RelateUnit_EFGPData = Grid_RelateUnit_EFGPObj.getData();
 		gDdlRUFactory.value = gHdnRUFactory.value;
+
+		var tIndex = Grid_RelateUnit_EFGPObj.getSelectionProperty("index");
+
+     	var isDdlRUFactory_disabled = grid_RelateUnit_EFGPData[tIndex][4] == 3 ? 'N' : 'Y';
+     	if(isDdlRUFactory_disabled == 'Y') {
+     		gDdlRUFactory.disabled = true;
+     		gDdlRUFactory.value = '$$$$$$';
+     	} else {
+     		gDdlRUFactory.disabled = false;
+     	}
+
 	}
 	//主導部門
 	if(pGridId=="aw46"){
 		
 	}
+
+
+	// 
+	if(pGridId == Grid_ECNModRecordObj.getId()) {
+		// var grid_ECNModRecordData = Grid_ECNModRecordObj.getData();
+		// var tIndex = Grid_ECNModRecordObj.getSelectionProperty("index");
+	    // var  = grid_ECNModRecordData[tIndex][4];
+	    if(gHdnIsNeed.value == 'Y') {
+	    	gRdoIsNeed_0.checked = true;
+	    	gRdoIsNeed_1.checked = false;
+	    } else {
+	    	gRdoIsNeed_0.checked = false;
+	    	gRdoIsNeed_1.checked = true;
+	    }
+	    // alert('gHdnECNFactory.value: ' + gHdnECNFactory.value);
+
+	    gDdlECNFactory.value = gHdnECNFactory.value;
+
+	}
+
+	if(pGridId == Grid_ModDocObj.getId()) {
+		if(gHdnModDocIsNeed.value == 'Y') {
+			gRdoModDocIsNeed_0.checked = true;
+			gRdoModDocIsNeed_1.checked = false;
+		} else {
+			gRdoModDocIsNeed_0.checked = false;
+			gRdoModDocIsNeed_1.checked = true;
+		}
+
+	}
+
+
 }
 
 function Checkbox_IsConvertPDF_onclick() {
@@ -1423,6 +1552,9 @@ function Checkbox_IsConvertPDF_onclick() {
 function Button_ModDocAdd_onclick() {
 	var msg="";
 
+	if(gTxtModDocNo.value == '') {
+		msg += "請選擇文件編號!!\n";
+	}
 	var tGridDataRec = Grid_ModDocObj.getData();
 	if (tGridDataRec.length > 0) {
 		for (var i = 0; i < tGridDataRec.length; i++) {
@@ -1431,8 +1563,8 @@ function Button_ModDocAdd_onclick() {
 			}
 		}
 	}
-	if(gTxtModDocNo.value!=""&&gRdoModDocIsNeed_0.checked==false&&gRdoModDocIsNeed_1.checked==false){
-		msg+="請選擇文件是否需要變更!!\n";
+	if (gTxtModDocNo.value != "" && gRdoModDocIsNeed_0.checked == false && gRdoModDocIsNeed_1.checked == false) {
+		msg += "請選擇文件是否需要變更!!\n";
 	}
 	if(gRdoModDocIsNeed_1.checked==true){
 		if(gTxaDocUnNessResason.value==""){
@@ -1466,7 +1598,9 @@ function Button_ModDocAdd_onclick() {
 		// alert('phase 2');
 		Grid_ModDocObj.addRow();
 		gGrid_ModDoc.value = Grid_ModDocObj.toArrayString();
+		storeNoNeedToClear_forGrid_ModDoc();
 		Grid_ModDocObj.clearBinding();
+		revertNoNeedToClear_forGrid_ModDoc();
 		resetRdoModDocIsNeed();
 	}
 }
@@ -1518,7 +1652,9 @@ function Button_ModDocEdit_onclick() {
 		}
 		Grid_ModDocObj.editRow();
 		gGrid_ModDoc.value =Grid_ModDocObj.toArrayString();
+		storeNoNeedToClear_forGrid_ModDoc();
 		Grid_ModDocObj.clearBinding();
+		revertNoNeedToClear_forGrid_ModDoc();
 		resetRdoModDocIsNeed();
 	}
 }
@@ -1531,7 +1667,9 @@ function Button_ModDocDel_onclick() {
 	}
 	Grid_ModDocObj.deleteRow();
 	gGrid_ModDoc.value =Grid_ModDocObj.toArrayString();
+	storeNoNeedToClear_forGrid_ModDoc();
 	Grid_ModDocObj.clearBinding();
+	revertNoNeedToClear_forGrid_ModDoc();
 }
 
 function loadQuery(data) {
@@ -1570,7 +1708,7 @@ function loadWorkingDay(data) {
 }*/
 
 function resetRdoModDocIsNeed() {
-	alert('resetRdoModDocIsNeed');
+	// alert('resetRdoModDocIsNeed');
 	gRdoModDocIsNeed_0.checked = false;
 	gRdoModDocIsNeed_1.checked = false;
 }
@@ -1783,19 +1921,25 @@ function setGrid_RelateUnit() {
 	var arr2 = [];
 	if(gRelateUnit_EFGP.length >0){
 		for(var i=0;i<gRelateUnit_EFGP.length;i++){
-			var arr = [];
-			arr[0] = gRelateUnit_EFGP[i][2];
-			arr[1] = gRelateUnit_EFGP[i][3];
-			arr[2] = gRelateUnit_EFGP[i][4];
-			arr[3] = gRelateUnit_EFGP[i][5];
-			arr[4] = gRelateUnit_EFGP[i][6];
+			if(gRelateUnit_EFGP[i][4] != '4') {
+				var arr = [];
+				arr[0] = gRelateUnit_EFGP[i][2];
+				arr[1] = gRelateUnit_EFGP[i][3];
+				arr[2] = gRelateUnit_EFGP[i][4];
+				arr[3] = gRelateUnit_EFGP[i][5];
+				arr[4] = gRelateUnit_EFGP[i][6];
 
-			arr2[i] = arr;
+				arr2[i] = arr;	
+			}
+			
 		}
-		Grid_RelateUnitObj.reload(arr2);
+		if(arr2.length > 0) {
+			Grid_RelateUnitObj.reload(arr2);
+		}
 	}
 
 	document.getElementById("Grid_RelateUnit").value = Grid_RelateUnitObj.toArrayString();  //將新的資料存入Grid隱藏欄位中
+	alert('Grid_RelateUnitObj.getData:' + Grid_RelateUnitObj.getData());
 	alert('Grid_RelateUnit.value:' + document.getElementById("Grid_RelateUnit").value);
 }
 
@@ -1808,6 +1952,110 @@ function Grid_RelateUnit_init() {
 			Grid_RelateUnitObj.reload(eval(grd_RelateUnit_value));//若Grid有資料則將存於隱藏中的值載入Grid中   
 		}   
 	}
+}
+
+
+function getAllPowerLevel() {
+	// alert('getAllPowerLevel');
+	ajax_IsoModuleAccessor.getAllSecurityLevelForOpenWin(loadAllPowerLevel);
+}
+
+function loadAllPowerLevel(data) {
+	// alert('loadAllPowerLevel');
+	for (var i = 0; i < data.length; i++) {
+		allPowerLevel = allPowerLevel + "['" + data[i].OID + "','" + data[i].name + "'],";
+	}
+	allPowerLevel = "[" + allPowerLevel.substring(0, allPowerLevel.length - 1) + "]";
+	queryList(eval(allPowerLevel), "Dropdown_PowerLevel");
+	document.getElementById("Dropdown_PowerLevel").value = document.getElementById("Hdn_PowerLevel").value;
+}
+
+function queryList(resultList, sel) {
+	// alert('queryList');
+	var selVer = document.getElementById(sel);
+
+	removeOptions(selVer);
+	if ((resultList.length > 0)) {
+		appendOptionLast(selVer, "--------------", 0);
+		for (var idx = 0; idx < resultList.length; idx++) {
+			var opt = appendOptionLast(selVer, resultList[idx][1], resultList[idx][0]);
+		}
+	}
+}
+function removeOptions(sel) {
+	// alert('removeOptions');
+	if (sel.length > 0) {
+		var i;
+		for (i = sel.length - 1; i >= 0; i--) {
+			sel.remove(i);
+		}
+	}
+}
+function appendOptionLast(sel, txt, val) {
+	// alert('appendOptionLast');
+	var newOpt = document.createElement('option');
+	newOpt.text = txt;
+	newOpt.value = val;
+	try {
+		sel.add(newOpt, null); // standards compliant; doesn't work in IE
+	} catch(e) {
+		sel.add(newOpt); // IE only
+	}
+	return newOpt;
+}
+
+
+function storeNoNeedToClear_forGrid_ModDoc() {
+
+	// alert('in storeNoNeedToClear_forGrid_ModDoc() method:  gTxtCustDocOwner: ' + gTxtCustDocOwner.value + ' ' +
+	// 			'gTxtCustDocOwnerName: ' + gTxtCustDocOwnerName.value + ' ' +
+	// 			'gHdnCustDocOwnerOID: ' + gHdnCustDocOwnerOID.value + ' ');
+
+	hdnCustDocOwnerOID_restore = document.getElementById('hdnCustDocOwnerOID').value;
+	txtCustDocOwner_restore = document.getElementById('txtCustDocOwner').value;
+	txtCustDocOwnerName_restore = document.getElementById('txtCustDocOwnerName').value;
+	hdnModInvoke_restore = document.getElementById('hdnModInvoke').value;
+	hdnPrice_restore = document.getElementById('hdnPrice').value;
+	hdnModDocDCCGroups_restore = document.getElementById('hdnModDocDCCGroups').value;
+
+}
+
+function revertNoNeedToClear_forGrid_ModDoc() {
+
+	document.getElementById('hdnCustDocOwnerOID').value = hdnCustDocOwnerOID_restore;
+	document.getElementById('txtCustDocOwner').value = txtCustDocOwner_restore;
+	document.getElementById('txtCustDocOwnerName').value = txtCustDocOwnerName_restore;
+	document.getElementById('hdnModInvoke').value = hdnModInvoke_restore;
+	document.getElementById('hdnPrice').value = hdnPrice_restore;
+	document.getElementById('hdnModDocDCCGroups').value = hdnModDocDCCGroups_restore;
+
+
+	// alert('in revertNoNeedToClear_forGrid_ModDoc() method:  gTxtCustDocOwner: ' + gTxtCustDocOwner.value + ' ' +
+	// 			'gTxtCustDocOwnerName: ' + gTxtCustDocOwnerName.value + ' ' +
+	// 			'gHdnCustDocOwnerOID: ' + gHdnCustDocOwnerOID.value + ' ');
+
+}
+
+
+function storeNoNeedToClear_forGrid_ECNModRecord() {
+
+	hdnCustDocOwnerOID_restore = document.getElementById('hdnCustDocOwnerOID').value;
+	txtCustDocOwner_restore = document.getElementById('txtCustDocOwner').value;
+	txtCustDocOwnerName_restore = document.getElementById('txtCustDocOwnerName').value;
+	// hdnModInvoke_restore = document.getElementById('hdnModInvoke').value;
+	// hdnPrice_restore = document.getElementById('hdnPrice').value;
+	// hdnModDocDCCGroups_restore = document.getElementById('hdnModDocDCCGroups').value;
+
+}
+
+function revertNoNeedToClear_forGrid_ECNModRecord() {
+	document.getElementById('hdnCustDocOwnerOID').value = hdnCustDocOwnerOID_restore;
+	document.getElementById('txtCustDocOwner').value = txtCustDocOwner_restore;
+	document.getElementById('txtCustDocOwnerName').value = txtCustDocOwnerName_restore;
+	// document.getElementById('hdnModInvoke').value = hdnModInvoke_restore;
+	// document.getElementById('hdnPrice').value = hdnPrice_restore;
+	// document.getElementById('hdnModDocDCCGroups').value = hdnModDocDCCGroups_restore;
+
 }
 
 
