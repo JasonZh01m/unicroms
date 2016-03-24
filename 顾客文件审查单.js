@@ -1,6 +1,9 @@
 /**
 *  顾客文件审查单
 *  2016.01.20
+*  2016/03/22 Add：制定單位預設為申請人主部門資訊
+*  2016/03/22 Add：申請人關卡需卡控核准主管欄位必填
+*  2016/03/23 Edit：客戶提出客服調整為多筆，故txtServiceNo_onblur程式不執行
 */
 
 //ajax service
@@ -49,6 +52,8 @@ var gRdoVerType_0 = document.getElementById("rdoVerType_0");//版本类别-->新
 var gRdoVerType_1 = document.getElementById("rdoVerType_1");//版本类别-->变更
 var gRdoVerType_2 = document.getElementById("rdoVerType_2");//版本类别-->作废
 var gDate_EffectDate = document.getElementById("Date_EffectDate");//生效日期
+var gDate_EffectDate_txt = document.getElementById("Date_EffectDate_txt");//生效日期
+var gDate_EffectDate_btn = document.getElementById("Date_EffectDate_btn");//生效日期
 var gRdoIsVersionAutoGen = document.getElementById("rdoIsVersionAutoGen");//文件版号
 var gRdoIsVersionAutoGen_0 = document.getElementById("rdoIsVersionAutoGen_0");//文件版号-->系统自动生成
 var gRdoIsVersionAutoGen_1 = document.getElementById("rdoIsVersionAutoGen_1");//文件版号-->自行输入
@@ -83,6 +88,7 @@ var gTextbox_RelatedUnitNo = document.getElementById("Textbox_RelatedUnitNo");//
 var gTextbox_RelatedUnitName = document.getElementById("Textbox_RelatedUnitName");//部门多選開窗名称
 var gGrid_RelateUnit_EFGP = document.getElementById("Grid_RelateUnit_EFGP");//会签单位grid
 var gTxaRelatedUnitReason = document.getElementById("txaRelatedUnitReason");//DCC签核意见
+var gTxaRelatedUnitReason_txt = document.getElementById("txaRelatedUnitReason_txt");//DCC签核意见
 var gRdoServiceIsAgree = document.getElementById("rdoServiceIsAgree");//客服意见
 var gRdoServiceIsAgree_0 = document.getElementById("rdoServiceIsAgree_0");//客服意见 接受
 var gRdoServiceIsAgree_1 = document.getElementById("rdoServiceIsAgree_1");//客服意见 部分接受
@@ -164,6 +170,11 @@ var hdnPrice_restore = '';
 var hdnModDocDCCGroups_restore = '';
 var allPowerLevel = "";
 
+var txaFinalManager = document.getElementById('txaFinalManager');  //核准主管
+var txaFinalManager_txt = document.getElementById('txaFinalManager_txt');  //核准主管_txt
+var txaService = document.getElementById('txaService');  //客服多選
+var txaService_txt = document.getElementById('txaService_txt');  //客服多選_txt
+
 
 //取得使用者上級單位
 function getManager(){
@@ -202,6 +213,11 @@ function getResumptionFormPrefix(){
 
 function formCreate(){
 	// alert('formCreate');
+	
+	gInputLabel_Author_lbl.value = userName;
+	document.getElementById("hdnAuthorName").value = userName;
+	gInputLabel_Author_txt.value = userId;
+	
 	var tsql = " select OID,id,docServerAddress from DocServer ";
 	var rs = tNaNaConn.query(tsql);
 	var phaseArray=new Array();
@@ -251,26 +267,55 @@ function formOpen(){
 		if(document.getElementById("btnPowerOpen"))	document.getElementById("btnPowerOpen").style.display = "none";
 	}	
 	
-	gInputLabel_Author_lbl.value = userName;
-	document.getElementById("hdnAuthorName").value = userName;
-	gInputLabel_Author_txt.value = userId;
+	
 	gTxtApplyDate.value = systemDateTime;
 	gBtnPCB_SBU.style.display="none";//隱藏
 	gBtnCAR_SBU.style.display="none";//隱藏
-	gBtnService.disabled = true;//唯讀
+	//gBtnService.disabled = true;//唯讀
+	//T
+	document.getElementById("InputLabel_Author").disabled = true;
+	document.getElementById("InputLabel_Author_btn").disabled = true;
+	document.getElementById("Dropdown_PowerLevel").disabled = true;
+	if(activityId=="Requester"){
+		document.getElementById("Dropdown_RelatedUnits").disabled = false;
+		document.getElementById("ddlRUFactory").disabled = false;
+		document.getElementById("Button_RelatedUnit").disabled = false;
+		document.getElementById("Button_EditUnit").disabled = false;
+		document.getElementById("Button_DelUnit").disabled = false;
+		document.getElementById("Button_EditLeadUnit").disabled = false;
+		document.getElementById("Button_DelLeadUnit").disabled = false;
+		
+		document.getElementById("txaRelatedUnitReason").disabled = false;
+		
+	}else{
+		document.getElementById("Dropdown_RelatedUnits").disabled = true;
+		document.getElementById("ddlRUFactory").disabled = true;
+		document.getElementById("Button_RelatedUnit").disabled = true;
+		document.getElementById("Button_EditUnit").disabled = true;
+		document.getElementById("Button_DelUnit").disabled = true;
+		document.getElementById("Button_EditLeadUnit").disabled = true;
+		document.getElementById("Button_DelLeadUnit").disabled = true;
+		
+		document.getElementById("txaRelatedUnitReason").disabled = true;
+	}
+	
+	
 	// gRdoModDocIsNeed.disabled = true;//唯讀
 	setRdoModDocIsNeedDisable(true);
 
 	gTxtModDocNo.disabled = true;//唯讀
 	if(activityId=="ISODocManagerConfirm"){
-		gDate_EffectDate.disabled = false;
+		gDate_EffectDate.disabled = true;
+		gDate_EffectDate_btn.disabled = true;
 		// gRdoModDocIsNeed.disabled = false;
 
 		gTxtModDocNo.disabled = false;
 	}else{
 		gDate_EffectDate.disabled=true;
+		gDate_EffectDate_btn.disabled = true;
 	}
 	if(activityId=="RelateUnits"||activityId=="ECNUnitManager"){
+		document.getElementById("txtECNNo").disabled = false;
 		gBtnECNNo.disabled=false;
 		gBtnPCB_SBU.disabled=false;
 		gBtnCAR_SBU.disabled=false;
@@ -291,6 +336,27 @@ function formOpen(){
 		gRdoIsNeed_0.disabled = false;
 		gRdoIsNeed_1.disabled = false;
 
+	}else{
+		document.getElementById("txtECNNo").disabled = true;
+		gBtnECNNo.disabled=true;
+		gBtnPCB_SBU.disabled=true;
+		gBtnCAR_SBU.disabled=true;
+		//gRdoIsNeed.disabled=true;
+		gTxaUnNessResason.disabled=true;
+		gTxaUnNessResason.readonly=true;
+		// gTxaUnNessResason.value = "test gTxaUnNessResason";
+
+		gDropdown_ECNUnit.disabled=true;
+		gDdlECNFactory.disabled=true;
+		// gDropdown_ECNUnit.disabled = true;
+		gButton_ModECNEdit.disabled=true;
+
+		tButton_ModDocAdd.disabled = true;
+		tButton_ModDocEdit.disabled = true;
+		tButton_ModDocDel.disabled = true;
+
+		gRdoIsNeed_0.disabled = true;
+		gRdoIsNeed_1.disabled = true;
 	}
 	if(activityId=="RelateUnits"){
 		// alert('activityId is RelateUnits');
@@ -325,7 +391,7 @@ function formOpen(){
 	DWREngine.setAsync(true);
 	document.getElementById("Dropdown_PowerLevel").value = document.getElementById("Hdn_PowerLevel").value;
 	if (activityId == "Requester") {
-		document.getElementById("Dropdown_PowerLevel").value = "8a8dc21d513e248d01514375aad00001";
+		document.getElementById("Dropdown_PowerLevel").value = "8a8dc21d53933594015393674027000e";
 		document.getElementById("Hdn_PowerLevel").value = document.getElementById("Dropdown_PowerLevel").value;
 	}
 
@@ -370,12 +436,11 @@ function formOpen(){
 	document.getElementById("Btn_DocServerAdd").style.display="none";//隱藏
 	hideColumnByPrefix(tFormPrefixDocument,"Block_A");
 	// alert('hideColumnByPrefix finish');
-	document.getElementById(formId + "_shell").style.height = '2190px';
+	document.getElementById(formId + "_shell").style.height = '2310px';
 	document.getElementById("Attachment").disabled = false;
 	// 2016-03-16 move from formCreate
 
 	document.getElementById('hdnModInvoke').value = 'Y'; // 预设值为Y
-
 
 	return true;
 }
@@ -427,7 +492,7 @@ function formSave(){
 	
 	if(activityId=="ISODocManagerConfirm"){
 		gDate_EffectDate.value = systemDateTime;
-		
+		gDate_EffectDate_txt.value = systemDateTime;
 		var grdECN = Grid_ECNModRecordObj.getData();
 		var userNo = "";
 		for(var i=0;i<grdECN.length;i++){
@@ -471,6 +536,16 @@ function formSave(){
 	// alert(gHdnTextbox_RelatedDep.value);
 	formSave_end();
 	// return false;
+	
+	//20160322 Add by Bryan 制定單位預設為申請人主部門資訊
+	DWREngine.setAsync(false);
+	if(activityId == "Requester"){
+		gTextbox_FrameUnitNo.value = mainOrgUnitIds;
+		gTextbox_FrameUnitName.value = mainOrgUnitNames;
+		gHdnTextbox_FrameUnit.value = mainOrgUnitOIDs;
+	}
+	DWREngine.setAsync(true);
+	
 	return true;
 }
 
@@ -486,6 +561,20 @@ function formSave_end() {
    	// alert('gHdnTextbox_RelatedDep.value: ' + gHdnTextbox_RelatedDep.value);
 
 
+}
+
+//20160323 Add by Bryan 所有關卡檢查簽核意見欄必填
+function formDispatch(){
+
+	if(activityId != "Requester"){
+	   var tComment=window.parent.document.forms[0].txaExecutiveComment.value;   //取得簽核意見欄位的內容
+	   if(tComment==""){    //判斷是否為空值
+		  alert("請填寫簽核意見!!");
+		   return false;
+	   }else{
+		  return true;
+		}
+	  }
 }
 
 function formClose(){
@@ -506,33 +595,41 @@ function formCheck(){
 	if(gRdoQuotaType_0.checked==false&&gRdoQuotaType_1.checked==false){
 		msg+="請選擇編制類別!!\n";
 	}
+	/*
 	if(gTxtServiceNo.value==""||gTxtServiceName.value==""){
 		msg+="請選擇客服人員!!\n";
 	}
+	*/
+	if(txaService_txt.value==""){
+		msg+="請選擇客服人員!!\n";
+	}	
 	if(gTxtCustCode.value==""){
-		msg+="顧客代碼不能爲空!!\n";
+		msg+="請填寫顧客代碼!!\n";
 	}
 	if(gTextbox_DocName.value==""){
-		msg+="文件名稱不能爲空!!\n";
+		msg+="請填寫文件名稱!!\n";
 	}
 	if(gTextbox_DocNo.value==""){
-		msg+="文件編號不能爲空!!\n";
+		msg+="請填寫文件編號!!\n";
 	}
 	if(gRdoVerType_0.checked==false&&gRdoVerType_1.checked==false&&gRdoVerType_2.checked==false){
 		msg+="請選擇版本類別!!\n";
 	}
 	if(gTextbox_CustomVersion.value==""){
-		msg+="文件版號不能爲空!!\n";
+		msg+="請填寫文件版號!!\n";
 	}
 	if(gDropdown_KeepingUnits.value==""||gTextbox_KeepingUnitNo.value==""){
 		msg+="請選擇保管單位!!\n";
 	}
 	if(gTxaDocDesc.value==""||gTxaDocDesc.value=="請填寫與舊版的差異"){
-		msg+="描述備註不能爲空!!\n";
+		msg+="請填寫描述備註!!\n";
 	}
 	if(gRdoImportant_0.checked==false&&gRdoImportant_1.checked==false){
 		msg+="請選擇會簽時效!!\n";
 	}
+	if(gTxaRelatedUnitReason.value==""){
+		msg+="請填寫簽核意見!!\n";
+	}	
 	var grdRelateUnit = Grid_RelateUnit_EFGPObj.getData();
 	if(grdRelateUnit.length<=0){
 		msg+="請選擇會簽單位!!\n";
@@ -545,13 +642,36 @@ function formCheck(){
 	if(gHdnRelatedUnitIsAgree.value=="X"||gHdnRelatedUnitIsAgree.value=="N"){
 		var txaServiceReply_t = trim(gTxaServiceReply.value);
 		if(txaServiceReply_t == ""){
-			msg+="客服意見匯整不能爲空!!\n";
+			msg+="請填寫客服意見匯整!!\n";
 		}
 	}
 	if(gCheckbox_IsConvertPDF_0.checked==false&&gCheckbox_IsConvertPDF_1.checked==false){
 		msg+="請選擇是否轉檔!!\n";
 	}else if(gCheckbox_IsConvertPDF_1.checked==false&&gPDFFileSecurity_0.checked==false&&gPDFFileSecurity_1.checked==false&&gPDFFileSecurity_2.checked==false){
 		msg+="請選擇文件轉檔後之安全性!!\n";
+	}
+	
+	//20160322 Add by Bryan 申請人關卡需卡控核准主管欄位必填
+	if(activityId=="Requester" || activityId=="ISODocManager" || activityId=="DCC_Check"){
+		if(txaFinalManager_txt.value==""){
+			msg+="請填寫核准主管!!\n";
+		}
+	}	
+	
+	//20160322 T 申請人關卡 卡控至少上傳一筆附件
+	if(activityId=="Requester"){
+		if(document.getElementById("Attachment_shell")!=null){
+			
+		}else{
+			msg+="請至少上傳一筆附件資料!!\n";
+		}
+	}
+	if(activityId=="RelateUnits" || activityId=="ECNUnitManager"){
+		if(gRdoIsNeed_0.checked == true){
+			if(document.getElementById("txtECNNo").value=="" ||document.getElementById("txtECNNo").value==null){
+				msg+="ECN單號不能爲空!!\n";
+			}
+		}
 	}
 	
 	if(msg!=""){
@@ -673,7 +793,7 @@ function btnECNDept_onclick(){
            			"from CustFactory_GroupManager CustTB, Users, OrganizationUnit Unit " +
            			"where CustTB.deptOID = Unit.OID and Unit.managerOID = Users.OID ";
 
-        // alert('for testing in btnECNDept_onclick() sql: ' + tsql);
+        //alert('for testing in btnECNDept_onclick() sql: ' + tsql);
 		var FileName = "SingleOpenWin";
 		var SQLClaused = new Array(tsql);
 		var SQLLabel = new Array ("部門代號","部門名稱","部門主管代號","部門主管姓名");
@@ -709,7 +829,26 @@ function rdoIsNeed_onclick(){
 	}else{
 		gHdnIsNeed.value = "Y";
 	}
-	
+	//T
+	if(activityId=="RelateUnits" || activityId=="ECNUnitManager"){
+		if(gRdoIsNeed_0.checked==true){
+			document.getElementById("btnECNDept").disabled = true;
+			document.getElementById("ddlECNFactory").disabled = true;
+			document.getElementById("Dropdown_ECNUnit").disabled = true;
+			document.getElementById("btnECNNo").disabled = false;
+			document.getElementById("ddlECNFactory").value = "$$$$$$";
+			document.getElementById("Dropdown_ECNUnit").value = "1";
+			document.getElementById("txtECNDeptId").value = "";
+			document.getElementById("txtECNDeptName").value = "";
+			document.getElementById("hdnECNUnitManager").value = "";
+		}else if(gRdoIsNeed_1.checked==true){
+			document.getElementById("btnECNDept").disabled = false;
+			document.getElementById("ddlECNFactory").disabled = false;
+			document.getElementById("Dropdown_ECNUnit").disabled = false;
+			document.getElementById("btnECNNo").disabled = true;
+			document.getElementById("txtECNNo").value = "";
+		}
+	}
 }
 
 function btnPCB_SBU_onclick(){
@@ -745,7 +884,7 @@ function btnECNNo_onclick(){
 		singleOpenWin(FileName,databaseCfgId_EF2K,SQLClaused,SQLLabel,QBEField,QBELabel,RetrunId,700,430);
 		   
 	}else if(gHdnPrice.value=="Carrier"){
-		tsql = " select Frm03.formSerialNumber, Frm03.aply_name, Frm03.aply_date, "+
+		tsql = " select Frm03.formSerialNumber, Frm03.aply_name, Convert(varchar(100),Frm03.aply_date,111), "+
            " CASE PI.currentState WHEN '1' THEN '簽核中' WHEN '3' THEN '同意' END currentState "+
            " from frm_03_carecr Frm03, ProcessInstance PI "+
            " where Frm03.processSerialNumber = PI.serialNumber and PI.currentState <= 3 ";
@@ -762,23 +901,27 @@ function btnECNNo_onclick(){
 
 //主導部門新增
 function Button_EditLeadUnit_onclick(){
-	var grdRelateUnitData = Grid_RelateUnit_EFGPObj.getData();
-	var tIndex = Grid_RelateUnit_EFGPObj.getSelectionProperty("index");
-	var grdLeadUnitData = Grid_LeadUnitObj.toArrayString();
-	var tGridDtl = "";
-	var tDel = grdLeadUnitData.substring(0,grdLeadUnitData.lastIndexOf("]")); 
-	if(grdLeadUnitData!="[]"){
-		tDel+=",[";
-	}else{
-		tDel+="[";
+	//判斷會簽單位grid是否有值
+	var gridData = Grid_RelateUnitObj.getData();
+	if(gridData.length>=1){
+		var grdRelateUnitData = Grid_RelateUnit_EFGPObj.getData();
+		var tIndex = Grid_RelateUnit_EFGPObj.getSelectionProperty("index");
+		var grdLeadUnitData = Grid_LeadUnitObj.toArrayString();
+		var tGridDtl = "";
+		var tDel = grdLeadUnitData.substring(0,grdLeadUnitData.lastIndexOf("]")); 
+		if(grdLeadUnitData!="[]"){
+			tDel+=",[";
+		}else{
+			tDel+="[";
+		}
+		for(var i=0;i<grdRelateUnitData[tIndex].length;i++){
+			tDel += "'"+grdRelateUnitData[tIndex][i]+"',";
+		}
+		tDel = tDel.substring(0,(tDel.lastIndexOf(","))); 
+		tDel+="]]";
+		Grid_LeadUnitObj.reload(eval(tDel)); 
+		document.getElementById("Grid_LeadUnit").value = Grid_LeadUnitObj.toArrayString();  //將新的資料存入Grid隱藏欄位中
 	}
-	for(var i=0;i<grdRelateUnitData[tIndex].length;i++){
-		tDel += "'"+grdRelateUnitData[tIndex][i]+"',";
-	}
-	tDel = tDel.substring(0,(tDel.lastIndexOf(","))); 
-	tDel+="]]";
-	Grid_LeadUnitObj.reload(eval(tDel)); 
-	document.getElementById("Grid_LeadUnit").value = Grid_LeadUnitObj.toArrayString();  //將新的資料存入Grid隱藏欄位中
 }
 
 //主導部門刪除
@@ -1044,17 +1187,18 @@ function Button_RelatedUnit_onclick(){ // 相關單位的開窗
 	}
 	if(gDropdown_RelatedUnits.value=="3"){
 		var FileName = "PluralityOpenWin";
-		/*
+		
 		var tsql = " select CustTB.deptId, CustTB.deptName, Groups.id, Groups.groupName,Groups.OID "+
            " from CustFactory_GroupManager CustTB, Groups "+
            " where CustTB.GroupOID = Groups.OID  " +
 		   " and CustTB.factoryId = '"+gHdnRUFactory.value+"'";
-		*/
+		/*
 		var tsql = " select CustTB.deptId, CustTB.deptName, Groups.id, Groups.groupName,Groups.OID "+
            " from CustFactory_GroupManager CustTB, Groups "+
            " where CustTB.GroupOID = Groups.OID ";
-
-		// alert('for testing in Button_RelatedUnit_onclick() sql: ' + tsql);
+		*/
+		
+		//alert('for testing in Button_RelatedUnit_onclick() sql: ' + tsql);
 		var SQLClaused = new Array(tsql);
 		var SQLLabel = new Array ("部門代號","部門名稱","對應群組代號","對應群組名稱");
 		var QBEField = new Array("CustTB.deptId","CustTB.deptName","Groups.id","Groups.groupName");
@@ -1138,8 +1282,9 @@ function getRUFactory(){
 	// 2016-03-16
 	var rs=tNaNaConn.query(tSql);
     if(rs.length>0){
+		DWRUtil.removeAllOptions("ddlECNFactory");
         // gDdlRUFactory.options.add(new Option('---請選擇---', '$$$$$$'));
-        // gDdlECNFactory.options.add(new Option('---請選擇---', '$$$$$$'));
+        gDdlECNFactory.options.add(new Option('---請選擇---', '$$$$$$'));
         for(var i = 0 ;i<rs.length; i++){
             var opt = new Option(rs[i][0],rs[i][0]);
 
@@ -1149,7 +1294,8 @@ function getRUFactory(){
     }
 
     if(rs.length>0){
-        // gDdlRUFactory.options.add(new Option('---請選擇---', '$$$$$$'));
+		DWRUtil.removeAllOptions("ddlRUFactory");
+        gDdlRUFactory.options.add(new Option('---請選擇---', '$$$$$$'));
         // gDdlECNFactory.options.add(new Option('---請選擇---', '$$$$$$'));
         for(var i = 0 ;i<rs.length; i++){
             var opt = new Option(rs[i][0],rs[i][0]);
@@ -1524,9 +1670,11 @@ function gridRowClick(pGridId){
 		if(gHdnModDocIsNeed.value == 'Y') {
 			gRdoModDocIsNeed_0.checked = true;
 			gRdoModDocIsNeed_1.checked = false;
-		} else {
+			gHdnModDocIsNeed.value = 'Y';
+		} else if(gHdnModDocIsNeed.value == 'N') {
 			gRdoModDocIsNeed_0.checked = false;
 			gRdoModDocIsNeed_1.checked = true;
+			gHdnModDocIsNeed.value = 'N';
 		}
 
 	}
@@ -1720,7 +1868,7 @@ function resetRdoIsNeed() {
 }
 
 
-
+/* 20160323 Edit by Bryan 客戶提出客服調整為多筆，故程式不執行
 function txtServiceNo_onblur(){
 	var ServiceNo = gTxtServiceNo.value;
 	var tsql = " select userName from Users where id = '"+ServiceNo+"'"
@@ -1734,6 +1882,7 @@ function txtServiceNo_onblur(){
 		return false;
 	}
 }
+*/
 
 // 2016-03-15 
 function setGrid_DocCategory() {
@@ -1916,7 +2065,7 @@ function setRdoModDocIsNeedDisable(pFlag) {
 }
 
 function setGrid_RelateUnit() {
-	// alert('setGrid_RelateUnit');
+	//alert('setGrid_RelateUnit');
 	var gRelateUnit_EFGP = Grid_RelateUnit_EFGPObj.getData();
 	var arr2 = [];
 	if(gRelateUnit_EFGP.length >0){
@@ -1939,8 +2088,8 @@ function setGrid_RelateUnit() {
 	}
 
 	document.getElementById("Grid_RelateUnit").value = Grid_RelateUnitObj.toArrayString();  //將新的資料存入Grid隱藏欄位中
-	// alert('Grid_RelateUnitObj.getData:' + Grid_RelateUnitObj.getData());
-	// alert('Grid_RelateUnit.value:' + document.getElementById("Grid_RelateUnit").value);
+	//alert('Grid_RelateUnitObj.getData:' + Grid_RelateUnitObj.getData());
+	//alert('Grid_RelateUnit.value:' + document.getElementById("Grid_RelateUnit").value);
 }
 
 // 2016-03-15
@@ -1969,6 +2118,7 @@ function loadAllPowerLevel(data) {
 	queryList(eval(allPowerLevel), "Dropdown_PowerLevel");
 	document.getElementById("Dropdown_PowerLevel").value = document.getElementById("Hdn_PowerLevel").value;
 }
+
 
 function queryList(resultList, sel) {
 	// alert('queryList');
@@ -2057,6 +2207,7 @@ function revertNoNeedToClear_forGrid_ECNModRecord() {
 	// document.getElementById('hdnModDocDCCGroups').value = hdnModDocDCCGroups_restore;
 
 }
+
 
 
 //$-----Auto generated script block, Please do not edit or modify script below this line.-----$//
