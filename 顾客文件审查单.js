@@ -673,7 +673,7 @@ function btnECNDept_onclick(){
            			"from CustFactory_GroupManager CustTB, Users, OrganizationUnit Unit " +
            			"where CustTB.deptOID = Unit.OID and Unit.managerOID = Users.OID ";
 
-        alert('for testing in btnECNDept_onclick() sql: ' + tsql);
+        // alert('for testing in btnECNDept_onclick() sql: ' + tsql);
 		var FileName = "SingleOpenWin";
 		var SQLClaused = new Array(tsql);
 		var SQLLabel = new Array ("部門代號","部門名稱","部門主管代號","部門主管姓名");
@@ -1054,7 +1054,7 @@ function Button_RelatedUnit_onclick(){ // 相關單位的開窗
            " from CustFactory_GroupManager CustTB, Groups "+
            " where CustTB.GroupOID = Groups.OID ";
 
-		alert('for testing in Button_RelatedUnit_onclick() sql: ' + tsql);
+		// alert('for testing in Button_RelatedUnit_onclick() sql: ' + tsql);
 		var SQLClaused = new Array(tsql);
 		var SQLLabel = new Array ("部門代號","部門名稱","對應群組代號","對應群組名稱");
 		var QBEField = new Array("CustTB.deptId","CustTB.deptName","Groups.id","Groups.groupName");
@@ -1139,7 +1139,7 @@ function getRUFactory(){
 	var rs=tNaNaConn.query(tSql);
     if(rs.length>0){
         // gDdlRUFactory.options.add(new Option('---請選擇---', '$$$$$$'));
-        gDdlECNFactory.options.add(new Option('---請選擇---', '$$$$$$'));
+        // gDdlECNFactory.options.add(new Option('---請選擇---', '$$$$$$'));
         for(var i = 0 ;i<rs.length; i++){
             var opt = new Option(rs[i][0],rs[i][0]);
 
@@ -1149,7 +1149,7 @@ function getRUFactory(){
     }
 
     if(rs.length>0){
-        gDdlRUFactory.options.add(new Option('---請選擇---', '$$$$$$'));
+        // gDdlRUFactory.options.add(new Option('---請選擇---', '$$$$$$'));
         // gDdlECNFactory.options.add(new Option('---請選擇---', '$$$$$$'));
         for(var i = 0 ;i<rs.length; i++){
             var opt = new Option(rs[i][0],rs[i][0]);
@@ -1916,7 +1916,7 @@ function setRdoModDocIsNeedDisable(pFlag) {
 }
 
 function setGrid_RelateUnit() {
-	alert('setGrid_RelateUnit');
+	// alert('setGrid_RelateUnit');
 	var gRelateUnit_EFGP = Grid_RelateUnit_EFGPObj.getData();
 	var arr2 = [];
 	if(gRelateUnit_EFGP.length >0){
@@ -1939,8 +1939,8 @@ function setGrid_RelateUnit() {
 	}
 
 	document.getElementById("Grid_RelateUnit").value = Grid_RelateUnitObj.toArrayString();  //將新的資料存入Grid隱藏欄位中
-	alert('Grid_RelateUnitObj.getData:' + Grid_RelateUnitObj.getData());
-	alert('Grid_RelateUnit.value:' + document.getElementById("Grid_RelateUnit").value);
+	// alert('Grid_RelateUnitObj.getData:' + Grid_RelateUnitObj.getData());
+	// alert('Grid_RelateUnit.value:' + document.getElementById("Grid_RelateUnit").value);
 }
 
 // 2016-03-15
