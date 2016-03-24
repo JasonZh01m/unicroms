@@ -458,12 +458,13 @@ function formSave(){
 	if(!formCheck()){
 		return false;
 	}
-
+	
 	if(workItemSource==0){
 		//gDate_setDate.value = systemDateTime;
 		gTxtApplyDate.value = systemDateTime;
 		
 	}
+	
 	if(activityId=="Requester"){
 		var  time= new Date();	
 		//ex.2016/01/11 10:58:55
@@ -488,6 +489,7 @@ function formSave(){
 
 	
 	
+	
 	if(activityId=="ISODocManagerConfirm"){
 		gDate_EffectDate.value = systemDateTime;
 		gDate_EffectDate_txt.value = systemDateTime;
@@ -506,6 +508,7 @@ function formSave(){
 		setGrid_RelateUnit();
 
 	}
+	
 	if(activityId=="RelateUnits"){
 		var grdECN = Grid_ECNModRecordObj.getData();
 		var flag = "";
@@ -526,6 +529,7 @@ function formSave(){
 		
 	}
 	
+	
 	document.getElementById("TextArea_ModDocModreason").value = "此文件變更單係由顧客文件審查單自動發起，單號：["+gSerialNumber.value+"]";
 	
 	
@@ -541,8 +545,7 @@ function formSave(){
 		gHdnTextbox_FrameUnit.value = mainOrgUnitOIDs;
 	}
 	DWREngine.setAsync(true);
-
-	// alert('return true');
+	
 	return true;
 }
 
@@ -571,8 +574,6 @@ function formDispatch(){
 	   }else{
 		  return true;
 		}
-	  } else {
-	  	return true;
 	  }
 }
 
@@ -1573,7 +1574,7 @@ function btnModDocNo_onclick(){
 
  function Textbox_DocNo_onchange2() {
  	// alert('Textbox_DocNo_onchange2');
- 	// alert(document.getElementById("HdnTextbox_ModDocDocOID").value);
+
 	var docOID=eval(document.getElementById("HdnTextbox_ModDocDocOID").value);
 
 	// alert('docOID\n' + docOID);
@@ -1589,29 +1590,30 @@ function btnModDocNo_onclick(){
 
    function loadDocReq(data){
    	// alert('loadDocReq');
-	 document.getElementById("txtModDocNo").value=data.cmItemId + "";  //文件編號
-     document.getElementById("Textbox_ModDocVerNoOld").value=data.document.displayVersion + "";  //版號
-     document.getElementById("Textbox_ModDocDocName").value=data.document.name + "";  //文件名稱
-	 document.getElementById("Textbox_ModDocInvNodDays").value=data.invNodDays + "";  //失效提前通知日
-     document.getElementById("TextArea_ModDocDocAbstract").value=data.document.description + "";  //文件摘要
-     document.getElementById("Dropdown_ModDocFrameUnits").value=data.document.creatUnitType + "";  //制定單位
-     document.getElementById("HdnTextbox_ModDocFrameUnit").value=data.document.creatUnitOID + "";
-     document.getElementById("Textbox_ModDocFrameUnitNo").value=data.document.creatUnitId + "";
-     document.getElementById("Textbox_ModDocFrameUnitName").value=data.document.creatUnitName + "";
-     document.getElementById("Dropdown_ModDocKeepingUnits").value=data.document.rsrvUnitType + "";  //保管單位
-     document.getElementById("HdnTextbox_ModDocKeepingUnit").value=data.document.rsrvUnitOID + "";
-     document.getElementById("Textbox_ModDocKeepingUnitNo").value=data.document.rsrvUnitId + "";	
-     document.getElementById("Textbox_ModDocKeepingUnitName").value=data.document.rsrvUnitName + "";
-     document.getElementById("InputLabel_ModDocAuthor_txt").value=data.document.authorId + "";  //文件製作者
-     document.getElementById("InputLabel_ModDocAuthor_lbl").value=data.document.authorName + "";	
-     document.getElementById("Textbox_ModDocConserveYear").value=data.document.rsrvYear + "";  //保存年限	
-     document.getElementById("ModDoc_Date_SetDate").value=data.document.createdTimeLabel + "";  //製作日期
-     document.getElementById("Date_ModDocEffectDate").value=data.document.validFromLabel + "";  //生效日期
-     document.getElementById("Date_ModDocDeadDate").value=data.document.validToLabel + "";  //失效日期
-     document.getElementById("Date_ModDocConserveDate").value=data.document.rsrvToLabel + "";  //保存到期日
-     document.getElementById("ModDoc_Time_LimitReadFrom").value=data.startReadTimeLabel + "";  //閱讀時間限制
-     document.getElementById("ModDoc_Time_LimitReadTo").value=data.endReadTimeLabel  + "";
-     document.getElementById("Textbox_ModDocReadTime").value=data.hoursOfReadable + "";  //可閱讀時數
+	 document.getElementById("txtModDocNo").value=data.cmItemId;  //文件編號
+     document.getElementById("Textbox_ModDocVerNoOld").value=data.document.displayVersion;  //版號
+     document.getElementById("Textbox_ModDocDocName").value=data.document.name;  //文件名稱
+	 
+	 document.getElementById("Textbox_ModDocInvNodDays").value=data.invNodDays;  //失效提前通知日
+     document.getElementById("TextArea_ModDocDocAbstract").value=data.document.description;  //文件摘要
+     document.getElementById("Dropdown_ModDocFrameUnits").value=data.document.creatUnitType;  //制定單位
+     document.getElementById("HdnTextbox_ModDocFrameUnit").value=data.document.creatUnitOID;
+     document.getElementById("Textbox_ModDocFrameUnitNo").value=data.document.creatUnitId;
+     document.getElementById("Textbox_ModDocFrameUnitName").value=data.document.creatUnitName;
+     document.getElementById("Dropdown_ModDocKeepingUnits").value=data.document.rsrvUnitType;  //保管單位
+     document.getElementById("HdnTextbox_ModDocKeepingUnit").value=data.document.rsrvUnitOID;
+     document.getElementById("Textbox_ModDocKeepingUnitNo").value=data.document.rsrvUnitId;	
+     document.getElementById("Textbox_ModDocKeepingUnitName").value=data.document.rsrvUnitName;
+     document.getElementById("InputLabel_ModDocAuthor_txt").value=data.document.authorId;  //文件製作者
+     document.getElementById("InputLabel_ModDocAuthor_lbl").value=data.document.authorName;	
+     document.getElementById("Textbox_ModDocConserveYear").value=data.document.rsrvYear;  //保存年限	
+     document.getElementById("ModDoc_Date_SetDate").value=data.document.createdTimeLabel;  //製作日期
+     document.getElementById("Date_ModDocEffectDate").value=data.document.validFromLabel;  //生效日期
+     document.getElementById("Date_ModDocDeadDate").value=data.document.validToLabel;  //失效日期
+     document.getElementById("Date_ModDocConserveDate").value=data.document.rsrvToLabel;  //保存到期日
+     document.getElementById("ModDoc_Time_LimitReadFrom").value=data.startReadTimeLabel;  //閱讀時間限制
+     document.getElementById("ModDoc_Time_LimitReadTo").value=data.endReadTimeLabel ;
+     document.getElementById("Textbox_ModDocReadTime").value=data.hoursOfReadable;  //可閱讀時數
 	 }	
 
 function updateSelectedDocumentList() {
@@ -1725,7 +1727,7 @@ function Button_ModDocAdd_onclick() {
 	}
 	// alert('finish abort date');
 	if(msg!=""){
-		alert(msg);
+		// alert(msg);
 		return false;
 	}else{
 		var sql = "select DocCmItem_Category.CategoryOID " +
@@ -1744,12 +1746,10 @@ function Button_ModDocAdd_onclick() {
 		// alert('phase 2');
 		Grid_ModDocObj.addRow();
 		gGrid_ModDoc.value = Grid_ModDocObj.toArrayString();
-		// alert('gGrid_ModDoc.value:\n' + gGrid_ModDoc.value);
 		storeNoNeedToClear_forGrid_ModDoc();
 		Grid_ModDocObj.clearBinding();
 		revertNoNeedToClear_forGrid_ModDoc();
 		resetRdoModDocIsNeed();
-		Grid_ModDoc_init();
 	}
 }
 
@@ -1804,7 +1804,6 @@ function Button_ModDocEdit_onclick() {
 		Grid_ModDocObj.clearBinding();
 		revertNoNeedToClear_forGrid_ModDoc();
 		resetRdoModDocIsNeed();
-		Grid_ModDoc_init();
 	}
 }
 
@@ -1815,19 +1814,16 @@ function Button_ModDocDel_onclick() {
 		return false;
 	}
 	Grid_ModDocObj.deleteRow();
-	gGrid_ModDoc.value = Grid_ModDocObj.toArrayString();
+	gGrid_ModDoc.value =Grid_ModDocObj.toArrayString();
 	storeNoNeedToClear_forGrid_ModDoc();
 	Grid_ModDocObj.clearBinding();
 	revertNoNeedToClear_forGrid_ModDoc();
-	Grid_ModDoc_init();
 }
 
 function loadQuery(data) {
-	// alert('loadQuery');
 	if (data != "") {
-		document.getElementById('hdnModDocDCCGroups').value = data + "";
+		document.getElementById('hdnModDocDCCGroups').value = data;
 	}
-	// alert(document.getElementById('hdnModDocDCCGroups').value);
 }
 
 //存失效日期
