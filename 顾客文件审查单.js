@@ -514,19 +514,21 @@ function formSave(){
 			if(grdECN[i][3]==""){
 				flag="Y";
 			}
-			unitManager += grdECN[i][10]+";";
+			if(grdECN[i][10] != '') {
+				unitManager += grdECN[i][10]+";";
+			}
 		}
 		gHdnGridECNNoIsNull.value = flag;
-		if(unitManager==""){
-			alert("部門主管爲空！");
-			return false;
-		}else{
-			gHdnUnitManagerAppr.value = unitManager;
-		}
+		// if(unitManager==""){
+		// 	alert("部門主管爲空！");
+		// 	return false;
+		// }else{
+		gHdnUnitManagerAppr.value = unitManager;
+		// }
 		
 	}
 	
-	document.getElementById("TextArea_ModDocModreason").value = "此文件變更單係由顧客文件審查單自動發起，單號：["+gSerialNumber.value+"]";
+	document.getElementById("TextArea_ModDocModreason").value = "此文件變更單係由顧客文件審查單自動發起，單號：\["+gSerialNumber.innerHTML+"\]";
 	
 	
 	// alert(gHdnTextbox_RelatedDep.value);
@@ -542,7 +544,8 @@ function formSave(){
 	}
 	DWREngine.setAsync(true);
 
-	// alert('return true');
+	// alert('return false');
+	// return false;
 	return true;
 }
 
@@ -556,7 +559,7 @@ function formSave_end() {
    	}
    	gHdnTextbox_RelatedDep.value = grdUsers_t;
    	// alert('gHdnTextbox_RelatedDep.value: ' + gHdnTextbox_RelatedDep.value);
-
+   	// alert('gHdnUnitManagerAppr.value:' + gHdnUnitManagerAppr.value);
 
 }
 
@@ -695,7 +698,7 @@ function Button_ModECNEdit_onclick(){
 		if(gTxtCustDocOwner.value ==""||gTxtCustDocOwnerName.value ==""){
 			msg+="申請人不能爲空!!\n";
 		}
-		if(gTxtECNNo.value!=""){
+		/*if(gTxtECNNo.value!=""){
 			if(gRdoIsNeed_0.checked==false&&gRdoIsNeed_1.checked==false){
 				msg+="請選擇是否需要變更!!\n";
 			}
@@ -705,16 +708,19 @@ function Button_ModECNEdit_onclick(){
 				}
 			}
 		}else{
-			if(gDropdown_ECNUnit.value==""){
-				msg+="請選擇部門類型!!\n";
-			}
-			if(gDdlECNFactory.value==""){
-				msg+="請選擇厰別!!\n";
-			}
-			if(gTxtECNDeptId.value==""||gTxtECNDeptName.value==""){
-				msg+="請選擇部門!!\n";
+			if(gRdoIsNeed_1.checked == false) {
+				if(gDropdown_ECNUnit.value==""){
+					msg+="請選擇部門類型!!\n";
+				}
+				if(gDdlECNFactory.value==""){
+					msg+="請選擇厰別!!\n";
+				}
+				if(gTxtECNDeptId.value==""||gTxtECNDeptName.value==""){
+					msg+="請選擇部門!!\n";
+				}
 			}
 		}
+
 		if(activityId=="ECNUnitManager"){
 			if(gTxtECNNo.value==""){
 				msg+="ECN單號不能爲空!!\n";
@@ -727,7 +733,22 @@ function Button_ModECNEdit_onclick(){
 					msg+="請填寫不需要變更原因!!\n";
 				}
 			}
+		}*/
+
+		if(gRdoIsNeed_0.checked==false&&gRdoIsNeed_1.checked==false){
+			msg+="請選擇是否需要變更!!\n";
 		}
+		if(gRdoIsNeed_0.checked==true) {
+			if(gTxtECNNo.value == '') {
+				msg += "請選擇ECN單號!!\n";
+			}
+		} else if (gRdoIsNeed_1.checked==true) {
+			if(gTxaUnNessResason.value==""){
+				msg+="請填寫不需要變更原因!!\n";
+			}
+		}
+
+
 	}
 	if(msg!=""){
 		alert(msg);
@@ -748,7 +769,7 @@ function Button_ModECNAdd_onclick(){
 		if(gTxtCustDocOwner.value ==""||gTxtCustDocOwnerName.value ==""){
 			msg+="申請人不能爲空!!\n";
 		}
-		if(gTxtECNNo.value!=""){
+		/*if(gTxtECNNo.value!=""){
 			if(gRdoIsNeed_0.checked==false&&gRdoIsNeed_1.checked==false){
 				msg+="請選擇是否需要變更!!\n";
 			}
@@ -758,16 +779,31 @@ function Button_ModECNAdd_onclick(){
 				}
 			}
 		}else{
-			if(gDropdown_ECNUnit.value==""){
-				msg+="請選擇部門類型!!\n";
+			if(gRdoIsNeed_1.checked == false) {
+				if(gDropdown_ECNUnit.value==""){
+					msg+="請選擇部門類型!!\n";
+				}
+				if(gDdlECNFactory.value==""){
+					msg+="請選擇厰別!!\n";
+				}
+				if(gTxtECNDeptId.value==""||gTxtECNDeptName.value==""){
+					msg+="請選擇部門!!\n";
+				}
 			}
-			if(gDdlECNFactory.value==""){
-				msg+="請選擇厰別!!\n";
+		}*/
+		if(gRdoIsNeed_0.checked==false&&gRdoIsNeed_1.checked==false){
+			msg+="請選擇是否需要變更!!\n";
+		}
+		if(gRdoIsNeed_0.checked==true) {
+			if(gTxtECNNo.value == '') {
+				msg += "請選擇ECN單號!!\n";
 			}
-			if(gTxtECNDeptId.value==""||gTxtECNDeptName.value==""){
-				msg+="請選擇部門!!\n";
+		} else if (gRdoIsNeed_1.checked==true) {
+			if(gTxaUnNessResason.value==""){
+				msg+="請填寫不需要變更原因!!\n";
 			}
 		}
+
 	}
 	if(msg!=""){
 		alert(msg);
@@ -1576,6 +1612,22 @@ function btnModDocNo_onclick(){
  	// alert(document.getElementById("HdnTextbox_ModDocDocOID").value);
 	var docOID=eval(document.getElementById("HdnTextbox_ModDocDocOID").value);
 
+ 	// alert('' + eval(document.getElementById("HdnTextbox_ModDocDocOID").value) + '');
+ 	var arr = docOID;
+ 	var arr_str = '';
+	arr_str += '[[';
+	for(var i = 0; i < arr[0].length; i++) {
+		arr_str += "'" + arr[0][i] + "'";
+		if(i < arr[0].length - 1) {
+			arr_str += ',';
+		}
+	}
+	arr_str += ']]';
+
+	// alert(arr_str);
+
+	document.getElementById("HdnTextbox_ModDocDocOID").value = arr_str;
+
 	// alert('docOID\n' + docOID);
 	tHdnModDocOID.value = docOID[0][4];
 	// alert("tHdnModDocOID.value=" + tHdnModDocOID.value);
@@ -1612,6 +1664,7 @@ function btnModDocNo_onclick(){
      document.getElementById("ModDoc_Time_LimitReadFrom").value=data.startReadTimeLabel + "";  //閱讀時間限制
      document.getElementById("ModDoc_Time_LimitReadTo").value=data.endReadTimeLabel  + "";
      document.getElementById("Textbox_ModDocReadTime").value=data.hoursOfReadable + "";  //可閱讀時數
+
 	 }	
 
 function updateSelectedDocumentList() {
@@ -1639,6 +1692,8 @@ function gridRowClick(pGridId){
      		gDdlRUFactory.disabled = false;
      	}
 
+     	
+
 	}
 	//主導部門
 	if(pGridId=="aw46"){
@@ -1659,8 +1714,31 @@ function gridRowClick(pGridId){
 	    	gRdoIsNeed_1.checked = true;
 	    }
 	    // alert('gHdnECNFactory.value: ' + gHdnECNFactory.value);
+	    if(gHdnECNFactory.value != '') {
+	    	gDdlECNFactory.value = gHdnECNFactory.value;
+	    } else {
+	    	gDdlECNFactory.value = '$$$$$$';
+	    }
 
-	    gDdlECNFactory.value = gHdnECNFactory.value;
+     	if(activityId=="RelateUnits" || activityId=="ECNUnitManager"){
+			if(gRdoIsNeed_0.checked==true){
+				document.getElementById("btnECNDept").disabled = true;
+				document.getElementById("ddlECNFactory").disabled = true;
+				document.getElementById("Dropdown_ECNUnit").disabled = true;
+				document.getElementById("btnECNNo").disabled = false;
+				document.getElementById("ddlECNFactory").value = "$$$$$$";
+				document.getElementById("Dropdown_ECNUnit").value = "1";
+				document.getElementById("txtECNDeptId").value = "";
+				document.getElementById("txtECNDeptName").value = "";
+				document.getElementById("hdnECNUnitManager").value = "";
+			}else if(gRdoIsNeed_1.checked==true){
+				document.getElementById("btnECNDept").disabled = false;
+				document.getElementById("ddlECNFactory").disabled = false;
+				document.getElementById("Dropdown_ECNUnit").disabled = false;
+				document.getElementById("btnECNNo").disabled = true;
+				document.getElementById("txtECNNo").value = "";
+			}
+		}
 
 	}
 
@@ -1825,9 +1903,11 @@ function Button_ModDocDel_onclick() {
 function loadQuery(data) {
 	// alert('loadQuery');
 	if (data != "") {
-		document.getElementById('hdnModDocDCCGroups').value = data + "";
+		data = data.replace(/\[/g, '[');
+		data = data.replace(/\]/g, ']');
+		document.getElementById('hdnModDocDCCGroups').value = "" + data + "";
 	}
-	// alert(document.getElementById('hdnModDocDCCGroups').value);
+	// alert('hdnModDocDCCGroups: ' + document.getElementById('hdnModDocDCCGroups').value);
 }
 
 //存失效日期
@@ -2002,7 +2082,7 @@ function init_for_formOpen() {
 	Grid_ECNModRecord_init();
 	Grid_ModDoc_init();
 
-	Grid_ModDocObj.setColumnIndices([0,1,3,4,5,8,10,12,13,14,16,17,18,20,21,22,28,33,36,37,38]);
+	// Grid_ModDocObj.setColumnIndices([0,1,3,4,5,8,10,12,13,14,16,17,18,20,21,22,28,33,36,37,38]);
 
 	if(gHdnPrice.value != '') {
 		gDdlPrice.value = gHdnPrice.value;
