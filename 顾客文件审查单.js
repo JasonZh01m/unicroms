@@ -4,6 +4,8 @@
 *  2016/03/22 Add：制定單位預設為申請人主部門資訊
 *  2016/03/22 Add：申請人關卡需卡控核准主管欄位必填
 *  2016/03/23 Edit：客戶提出客服調整為多筆，故txtServiceNo_onblur程式不執行
+*  2016/03/26 Edit：保管單位預設為填單人主部門資訊
+*  2016/03/26 Add：針對Grid欄位調整寬度顯示
 */
 
 //ajax service
@@ -217,6 +219,9 @@ function formCreate(){
 	gInputLabel_Author_lbl.value = userName;
 	document.getElementById("hdnAuthorName").value = userName;
 	gInputLabel_Author_txt.value = userId;
+	gTextbox_KeepingUnitNo.value = mainOrgUnitIds;  //保管單位預設為填單人主部門代號
+	gTextbox_KeepingUnitName.value = mainOrgUnitNames;  //保管單位預設為填單人主部門名稱
+	gHdnTextbox_KeepingUnit.value = mainOrgUnitOIDs;  //保管單位預設為填單人主部門OID
 	
 	var tsql = " select OID,id,docServerAddress from DocServer ";
 	var rs = tNaNaConn.query(tsql);
@@ -254,6 +259,7 @@ function formCreate(){
 }
 function formOpen(){
 	setDisable();
+	GridStyleSet();
 	//為手持裝置新增的按鈕 , 只於手持裝置上操作時會出現  SINCE NANA5.5.2 MODI BY 4182 IN 20121220	
 	var tOS = navigator.userAgent.toLowerCase();	
 	if(tOS.indexOf('iphone') > 0 || tOS.indexOf('ipad') > 0  || tOS.indexOf('ios') > 0 ){
@@ -286,6 +292,10 @@ function formOpen(){
 		document.getElementById("Button_DelLeadUnit").disabled = false;
 		
 		document.getElementById("txaRelatedUnitReason").disabled = false;
+		document.getElementById("Dropdown_KeepingUnits").disabled = true;		
+		document.getElementById("Textbox_KeepingUnitNo").readOnly = true;
+		document.getElementById("Button_KeepingUnit").disabled = true;
+		document.getElementById("Textbox_KeepingUnitName").readOnly = true;
 		
 	}else{
 		document.getElementById("Dropdown_RelatedUnits").disabled = true;
@@ -546,6 +556,11 @@ function formSave(){
 
 	// alert('return false');
 	// return false;
+	
+	if(activityId == "Service"){
+		window.parent.document.forms[0].txaExecutiveComment.value = gTxaServiceReply.value;
+	}
+	
 	return true;
 }
 
@@ -2292,6 +2307,72 @@ function revertNoNeedToClear_forGrid_ECNModRecord() {
 
 }
 
+//20160326 Add by Bryan
+function GridStyleSet(){
+	//顧客文件會簽單位	
+	if(typeof(Grid_RelateUnit_EFGPObj) != "undefined"){  
+		 Grid_RelateUnit_EFGPObj.setColumnIndices([1,2,3,4,6]);  
+
+	document.write("<style>#" + Grid_RelateUnit_EFGPObj.getId() + " .aw-column-1{width:100px;}</style>");
+	document.write("<style>#" + Grid_RelateUnit_EFGPObj.getId() + " .aw-column-2{width:90px;}</style>");
+	document.write("<style>#" + Grid_RelateUnit_EFGPObj.getId() + " .aw-column-3{width:150px;}</style>");
+	document.write("<style>#" + Grid_RelateUnit_EFGPObj.getId() + " .aw-column-4{width:70px;}</style>");
+	document.write("<style>#" + Grid_RelateUnit_EFGPObj.getId() + " .aw-column-6{width:250px;}</style>");
+	}
+	
+	//會簽單位主導部門
+	if(typeof(Grid_LeadUnitObj) != "undefined"){  
+		 Grid_LeadUnitObj.setColumnIndices([1,2,3,4,6]);  
+
+	document.write("<style>#" + Grid_LeadUnitObj.getId() + " .aw-column-1{width:100px;}</style>");
+	document.write("<style>#" + Grid_LeadUnitObj.getId() + " .aw-column-2{width:90px;}</style>");
+	document.write("<style>#" + Grid_LeadUnitObj.getId() + " .aw-column-3{width:150px;}</style>");
+	document.write("<style>#" + Grid_LeadUnitObj.getId() + " .aw-column-4{width:70px;}</style>");
+	document.write("<style>#" + Grid_LeadUnitObj.getId() + " .aw-column-6{width:250px;}</style>");
+	}	
+	
+	//ECN變更記錄
+	if(typeof(Grid_ECNModRecordObj) != "undefined"){  
+		 Grid_ECNModRecordObj.setColumnIndices([1,2,3,4,5,7,8,9]);  
+
+	document.write("<style>#" + Grid_ECNModRecordObj.getId() + " .aw-column-1{width:80px;}</style>");
+	document.write("<style>#" + Grid_ECNModRecordObj.getId() + " .aw-column-2{width:80px;}</style>");
+	document.write("<style>#" + Grid_ECNModRecordObj.getId() + " .aw-column-3{width:150px;}</style>");
+	document.write("<style>#" + Grid_ECNModRecordObj.getId() + " .aw-column-4{width:70px;}</style>");
+	document.write("<style>#" + Grid_ECNModRecordObj.getId() + " .aw-column-5{width:200px;}</style>");
+	document.write("<style>#" + Grid_ECNModRecordObj.getId() + " .aw-column-7{width:90px;}</style>");
+	document.write("<style>#" + Grid_ECNModRecordObj.getId() + " .aw-column-8{width:90px;}</style>");
+	document.write("<style>#" + Grid_ECNModRecordObj.getId() + " .aw-column-9{width:200px;}</style>");
+	//document.write("<style>#" + Grid_ECNModRecordObj.getId() + " .aw-column-10{width:150px;}</style>");	
+	}
+	
+	//文件工具變更記錄
+	if(typeof(Grid_ModDocObj) != "undefined"){  
+		 Grid_ModDocObj.setColumnIndices([0,1,3,4,5,8,10,13,14,17,18,20,21,22,28,36,37,38]);  
+
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-0{width:70px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-1{width:150px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-3{width:80px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-4{width:80px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-5{width:120px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-8{width:80px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-10{width:150px;}</style>");
+	//document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-11{width:150px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-13{width:80px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-14{width:200px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-17{width:150px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-18{width:200px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-20{width:100px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-21{width:200px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-22{width:100px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-28{width:100px;}</style>");
+	//document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-33{width:180px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-36{width:100px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-37{width:200px;}</style>");
+	document.write("<style>#" + Grid_ModDocObj.getId() + " .aw-column-38{width:150px;}</style>");	
+	}		
+	
+}
 
 
 //$-----Auto generated script block, Please do not edit or modify script below this line.-----$//
