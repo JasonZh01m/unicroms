@@ -258,6 +258,9 @@ function formCreate(){
 	return true;
 }
 function formOpen(){
+
+	// alert(document.getElementById('SerialNumber').innerHTML);
+
 	setDisable();
 	GridStyleSet();
 	//為手持裝置新增的按鈕 , 只於手持裝置上操作時會出現  SINCE NANA5.5.2 MODI BY 4182 IN 20121220	
@@ -475,6 +478,7 @@ function formSave(){
 		
 	}
 	if(activityId=="Requester"){
+		alert('activityId=="Requester"');
 		var  time= new Date();	
 		//ex.2016/01/11 10:58:55
 		gHdnSaveDate.value=systemDateTime+" "+time.getHours()+":"+time.getMinutes()+":"+time.getSeconds();
@@ -487,10 +491,10 @@ function formSave(){
 			workDays = 3;
 		}
 		
-		// alert("userOID="+userOID+" ,gHdnSaveDate="+gHdnSaveDate.value+" ,workDays="+workDays);
+		alert("userOID="+userOID+" ,gHdnSaveDate="+gHdnSaveDate.value+" ,workDays="+workDays);
 		ajax_OrgAccessor.fetchWorkDate(userOID,gHdnSaveDate.value,workDays,function(data){
 			gHdnLimitDate.value = data;
-			// alert('formsave.. data: ' + data);
+			alert('gHdnLimitDate.value: ' + gHdnLimitDate.value);
 		});
 
 	}
@@ -499,8 +503,12 @@ function formSave(){
 	
 	
 	if(activityId=="ISODocManagerConfirm"){
-		gDate_EffectDate.value = systemDateTime;
+	// if(activityId=="Requester"){
+		// gDate_EffectDate.value = systemDateTime;
 		gDate_EffectDate_txt.value = systemDateTime;
+		// alert('systemDateTime:' + systemDateTime);
+		// alert('gDate_EffectDate_txt.value:' + gDate_EffectDate_txt.value);
+
 		var grdECN = Grid_ECNModRecordObj.getData();
 		var userNo = "";
 		for(var i=0;i<grdECN.length;i++){
@@ -516,6 +524,7 @@ function formSave(){
 		setGrid_RelateUnit();
 
 	}
+
 	if(activityId=="RelateUnits"){
 		var grdECN = Grid_ECNModRecordObj.getData();
 		var flag = "";
@@ -538,7 +547,9 @@ function formSave(){
 		
 	}
 	
-	document.getElementById("TextArea_ModDocModreason").value = "此文件變更單係由顧客文件審查單自動發起，單號：\["+gSerialNumber.innerHTML+"\]";
+	document.getElementById("TextArea_ModDocModreason").value = "此文件變更單係由顧客文件審查單自動發起，單號：\[" + document.getElementById('SerialNumber').innerHTML + "\]";
+
+	// document.getElementById('SerialNumber').innerHTML.trim();
 	
 	
 	// alert(gHdnTextbox_RelatedDep.value);
@@ -561,6 +572,8 @@ function formSave(){
 		window.parent.document.forms[0].txaExecutiveComment.value = gTxaServiceReply.value;
 	}
 	
+	// alert('return false');
+	// return false;
 	return true;
 }
 
@@ -951,10 +964,11 @@ function btnECNNo_onclick(){
 
 //主導部門新增
 function Button_EditLeadUnit_onclick(){
+	// alert('Button_EditLeadUnit_onclick');
 	//判斷會簽單位grid是否有值
-	var gridData = Grid_RelateUnitObj.getData();
-	if(gridData.length>=1){
-		var grdRelateUnitData = Grid_RelateUnit_EFGPObj.getData();
+	// var gridData = Grid_RelateUnitObj.getData();
+	var grdRelateUnitData = Grid_RelateUnit_EFGPObj.getData();
+	if(grdRelateUnitData.length>=1){
 		var tIndex = Grid_RelateUnit_EFGPObj.getSelectionProperty("index");
 		var grdLeadUnitData = Grid_LeadUnitObj.toArrayString();
 		var tGridDtl = "";
