@@ -478,7 +478,7 @@ function formSave(){
 		
 	}
 	if(activityId=="Requester"){
-		alert('activityId=="Requester"');
+		// alert('activityId=="Requester"');
 		var  time= new Date();	
 		//ex.2016/01/11 10:58:55
 		gHdnSaveDate.value=systemDateTime+" "+time.getHours()+":"+time.getMinutes()+":"+time.getSeconds();
@@ -491,15 +491,19 @@ function formSave(){
 			workDays = 3;
 		}
 		
-		alert("userOID="+userOID+" ,gHdnSaveDate="+gHdnSaveDate.value+" ,workDays="+workDays);
+		// alert("userOID="+userOID+" ,gHdnSaveDate="+gHdnSaveDate.value+" ,workDays="+workDays);
+		DWREngine.setAsync(false);
 		ajax_OrgAccessor.fetchWorkDate(userOID,gHdnSaveDate.value,workDays,function(data){
 			gHdnLimitDate.value = data;
-			alert('gHdnLimitDate.value: ' + gHdnLimitDate.value);
+			// alert('gHdnLimitDate.value: ' + gHdnLimitDate.value);
 		});
+		DWREngine.setAsync(true);
 
 	}
 
 
+	// alert('return false;');
+	// return false;
 	
 	
 	if(activityId=="ISODocManagerConfirm"){
@@ -544,10 +548,12 @@ function formSave(){
 		// }else{
 		gHdnUnitManagerAppr.value = unitManager;
 		// }
-		
+
 	}
 	
-	document.getElementById("TextArea_ModDocModreason").value = "此文件變更單係由顧客文件審查單自動發起，單號：\[" + document.getElementById('SerialNumber').innerHTML + "\]";
+	if(activityId == 'RelateUnits') {
+		document.getElementById("TextArea_ModDocModreason").value = "此文件變更單係由顧客文件審查單自動發起，單號：\[" + document.getElementById('SerialNumber').innerHTML + "\]";
+	}
 
 	// document.getElementById('SerialNumber').innerHTML.trim();
 	
@@ -1594,7 +1600,7 @@ function Textbox_DocNo_onchange(){
 	//限制長度不可超過30
 	if (tDocId.length>30){
 		alert("文件編號長度不可超過30!");
-		return;
+		return false;
 	}
 	//alert("Textbox_DocNo_onchange");
 	ajax_IsoModuleAccessor.isIdExist(tDocId, loadChkIdExist);
@@ -1607,6 +1613,7 @@ function Textbox_DocNo_onchange(){
 		if (data){
 			alert("文件編號已重複"); //文件編號已重複
 			document.getElementById("hdnEnableAddDocument").value = "false";
+			document.getElementById("Textbox_DocNo").value = '';
 		}else{
 			//版號未重複，可以派送
 			alert("已確認是可用文件編號"); //已確認是可用文件編號
