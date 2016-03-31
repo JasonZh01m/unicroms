@@ -170,6 +170,7 @@ var txtCustDocOwnerName_restore = '';
 var hdnModInvoke_restore = '';
 var hdnPrice_restore = '';
 var hdnModDocDCCGroups_restore = '';
+var TextArea_ModDocModreason_restore = '';
 var allPowerLevel = "";
 
 var txaFinalManager = document.getElementById('txaFinalManager');  //核准主管
@@ -2290,6 +2291,7 @@ function storeNoNeedToClear_forGrid_ModDoc() {
 	hdnModInvoke_restore = document.getElementById('hdnModInvoke').value;
 	hdnPrice_restore = document.getElementById('hdnPrice').value;
 	hdnModDocDCCGroups_restore = document.getElementById('hdnModDocDCCGroups').value;
+	TextArea_ModDocModreason_restore = document.getElementById('TextArea_ModDocModreason').value;
 
 }
 
@@ -2301,6 +2303,7 @@ function revertNoNeedToClear_forGrid_ModDoc() {
 	document.getElementById('hdnModInvoke').value = hdnModInvoke_restore;
 	document.getElementById('hdnPrice').value = hdnPrice_restore;
 	document.getElementById('hdnModDocDCCGroups').value = hdnModDocDCCGroups_restore;
+	document.getElementById('TextArea_ModDocModreason').value = TextArea_ModDocModreason_restore;
 
 
 	// alert('in revertNoNeedToClear_forGrid_ModDoc() method:  gTxtCustDocOwner: ' + gTxtCustDocOwner.value + ' ' +
