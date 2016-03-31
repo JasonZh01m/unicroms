@@ -1306,6 +1306,9 @@ function changeUser(){
 			}
 		}     
 	}
+
+	document.getElementById("HdnTextbox_UnitUsers").value = vInputLabel.Id;
+
 	document.getElementById("hdnRUFactory").value = "";
 	document.getElementById("hdnRUFactoryName").value = tNewValue;
 	document.getElementById("Textbox_RelatedUnitNo").value = tNewValue;
