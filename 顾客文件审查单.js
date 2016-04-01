@@ -261,6 +261,11 @@ function formCreate(){
 function formOpen(){
 
 	// alert(document.getElementById('SerialNumber').innerHTML);
+	if(activityId == 'RelateUnits') {
+		gTxtCustDocOwner.value = userId;
+		gTxtCustDocOwnerName.value = userName;
+		gHdnCustDocOwnerOID.value = userOID;
+	}
 
 	setDisable();
 	GridStyleSet();
@@ -336,10 +341,11 @@ function formOpen(){
 		//gRdoIsNeed.disabled=false;
 		gTxaUnNessResason.disabled=false;
 		gTxaUnNessResason.readonly=false;
+		gTxaUnNessResason.style.display="none";
 		// gTxaUnNessResason.value = "test gTxaUnNessResason";
 
 		gDropdown_ECNUnit.disabled=false;
-		gDdlECNFactory.disabled=false;
+		// gDdlECNFactory.disabled=false;
 		// gDropdown_ECNUnit.disabled = false;
 		gButton_ModECNEdit.disabled=false;
 
@@ -358,10 +364,11 @@ function formOpen(){
 		//gRdoIsNeed.disabled=true;
 		gTxaUnNessResason.disabled=true;
 		gTxaUnNessResason.readonly=true;
+		gTxaUnNessResason.style.display = "none";
 		// gTxaUnNessResason.value = "test gTxaUnNessResason";
 
 		gDropdown_ECNUnit.disabled=true;
-		gDdlECNFactory.disabled=true;
+		// gDdlECNFactory.disabled=true;
 		// gDropdown_ECNUnit.disabled = true;
 		gButton_ModECNEdit.disabled=true;
 
@@ -373,10 +380,12 @@ function formOpen(){
 		gRdoIsNeed_1.disabled = true;
 	}
 	if(activityId=="RelateUnits"){
+		document.getElementById("TextArea_ModDocModreason").value = "此文件變更單係由顧客文件審查單自動發起，單號：\[" + document.getElementById('SerialNumber').innerHTML + "\]";
+
 		// alert('activityId is RelateUnits');
-		gTxtCustDocOwner.value = userId;
-		gTxtCustDocOwnerName.value = userName;
-		gHdnCustDocOwnerOID.value = userOID;
+		// gTxtCustDocOwner.value = userId;
+		// gTxtCustDocOwnerName.value = userName;
+		// gHdnCustDocOwnerOID.value = userOID;
 
 		// alert('gTxtCustDocOwner: ' + gTxtCustDocOwner.value + ' ' +
 		// 		'gTxtCustDocOwnerName: ' + gTxtCustDocOwnerName.value + ' ' +
@@ -552,9 +561,7 @@ function formSave(){
 
 	}
 	
-	if(activityId == 'RelateUnits') {
-		document.getElementById("TextArea_ModDocModreason").value = "此文件變更單係由顧客文件審查單自動發起，單號：\[" + document.getElementById('SerialNumber').innerHTML + "\]";
-	}
+	
 
 	// document.getElementById('SerialNumber').innerHTML.trim();
 	
@@ -579,8 +586,19 @@ function formSave(){
 		window.parent.document.forms[0].txaExecutiveComment.value = gTxaServiceReply.value;
 	}
 	
+	
+	if(activityId == 'RelateUnits') {
+		if(!isGrid_ECNModRecord_containCurrentUser()) {
+			alert("請至少填寫一筆ECN是否變更記錄!!");
+			return false;
+		}	
+	}
+	
+	
 	// alert('return false');
 	// return false;
+
+
 	return true;
 }
 
@@ -704,11 +722,23 @@ function formCheck(){
 		}
 	}
 	if(activityId=="RelateUnits" || activityId=="ECNUnitManager"){
-		if(gRdoIsNeed_0.checked == true){
-			if(document.getElementById("txtECNNo").value=="" ||document.getElementById("txtECNNo").value==null){
-				msg+="ECN單號不能爲空!!\n";
-			}
+		// if(gRdoIsNeed_0.checked == true){
+		// 	if(document.getElementById("txtECNNo").value=="" ||document.getElementById("txtECNNo").value==null){
+		// 		msg+="ECN單號不能爲空!!\n";
+		// 	}
+		// }
+		var gridData = Grid_ECNModRecordObj.getData();
+		if(gridData.length == 0) {
+			msg+="請至少填寫一筆ECN是否變更記錄!!\n";
 		}
+
+	} 
+	if(activityId == "RelateUnits") {
+		var gridData = Grid_ModDocObj.getData();
+		if(gridData.length == 0) {
+			msg+="請至少填寫一筆文件/工具是否變更記錄!!\n";
+		}
+
 	}
 	
 	if(msg!=""){
@@ -720,6 +750,9 @@ function formCheck(){
 }
 
 function Button_ModECNDel_onclick(){
+	if(!isGridRowAuthorizedForEdit(Grid_ECNModRecordObj, 0)) {
+		return false;
+	}
 	Grid_ECNModRecordObj.deleteRow();
 	gGrid_ECNModRecord.value = Grid_ECNModRecordObj.toArrayString();
 	storeNoNeedToClear_forGrid_ECNModRecord();
@@ -728,6 +761,10 @@ function Button_ModECNDel_onclick(){
 }
 
 function Button_ModECNEdit_onclick(){
+	if(!isGridRowAuthorizedForEdit(Grid_ECNModRecordObj, 0)) {
+		return false;
+	}
+
 	var msg="";
 	if(activityId=="RelateUnits"||activityId=="ECNUnitManager"){
 		if(gTxtCustDocOwner.value ==""||gTxtCustDocOwnerName.value ==""){
@@ -778,9 +815,9 @@ function Button_ModECNEdit_onclick(){
 				msg += "請選擇ECN單號!!\n";
 			}
 		} else if (gRdoIsNeed_1.checked==true) {
-			if(gTxaUnNessResason.value==""){
+			/*if(gTxaUnNessResason.value==""){
 				msg+="請填寫不需要變更原因!!\n";
-			}
+			}*/
 		}
 
 
@@ -834,9 +871,9 @@ function Button_ModECNAdd_onclick(){
 				msg += "請選擇ECN單號!!\n";
 			}
 		} else if (gRdoIsNeed_1.checked==true) {
-			if(gTxaUnNessResason.value==""){
+			/*if(gTxaUnNessResason.value==""){
 				msg+="請填寫不需要變更原因!!\n";
-			}
+			}*/
 		}
 
 	}
@@ -853,7 +890,7 @@ function Button_ModECNAdd_onclick(){
 	}
 }
 
-function btnECNDept_onclick(){
+/*function btnECNDept_onclick(){
         // var tsql = 	"select CustTB.deptId, CustTB.deptName, Users.id, Users.userName " +
         //    			"from CustFactory_GroupManager CustTB, Users, OrganizationUnit Unit " +
         //    			"where CustTB.deptOID = Unit.OID and Unit.managerOID = Users.OID " +
@@ -872,17 +909,17 @@ function btnECNDept_onclick(){
 		var RetrunId =new Array("txtECNDeptId","txtECNDeptName","hdnECNUnitManager","hdnNull");
 		singleOpenWin(FileName,databaseCfgId_EFGP,SQLClaused,SQLLabel,QBEField,QBELabel,RetrunId,700,430);
 		   
-}
+}*/
 
 function txtECNNo_onchange(){
 	if(gTxtECNNo.value==""){
 		gDropdown_ECNUnit.disabled = false;
-		gDdlECNFactory.disabled = false;
-		gBtnECNDept.disabled = false;
+		// gDdlECNFactory.disabled = false;
+		// gBtnECNDept.disabled = false;
 	}
 }
 
-function ddlECNFactory_onchange(){
+/*function ddlECNFactory_onchange(){
 	gHdnECNFactory.value = gDdlECNFactory.value; //將下拉表單value存入隱藏欄位
 	gHdnECNFactoryName.value = gDdlECNFactory.options[gDdlECNFactory.selectedIndex].text; //將下拉表單text存入隱藏欄位
 	if(gHdnECNFactory.value!="$$$$$$"){
@@ -890,11 +927,11 @@ function ddlECNFactory_onchange(){
 	}else{
 		gBtnECNDept.disabled=true;
 	}
-}
+}*/
 
 function rdoIsNeed_onclick(){
 	if(gRdoIsNeed_1.checked==true){
-		alert("警告！\n請詳述不需要之理由，嚴禁僅用'NA'字眼描述！");
+		// alert("警告！\n請詳述不需要之理由，嚴禁僅用'NA'字眼描述！");
 		gHdnIsNeed.value = "N";
 	}else{
 		gHdnIsNeed.value = "Y";
@@ -902,19 +939,19 @@ function rdoIsNeed_onclick(){
 	//T
 	if(activityId=="RelateUnits" || activityId=="ECNUnitManager"){
 		if(gRdoIsNeed_0.checked==true){
-			document.getElementById("btnECNDept").disabled = true;
-			document.getElementById("ddlECNFactory").disabled = true;
-			document.getElementById("Dropdown_ECNUnit").disabled = true;
+			// document.getElementById("btnECNDept").disabled = true;
+			// document.getElementById("ddlECNFactory").disabled = true;
+			// document.getElementById("Dropdown_ECNUnit").disabled = true;
 			document.getElementById("btnECNNo").disabled = false;
-			document.getElementById("ddlECNFactory").value = "$$$$$$";
-			document.getElementById("Dropdown_ECNUnit").value = "1";
-			document.getElementById("txtECNDeptId").value = "";
-			document.getElementById("txtECNDeptName").value = "";
+			// document.getElementById("ddlECNFactory").value = "$$$$$$";
+			// document.getElementById("Dropdown_ECNUnit").value = "1";
+			// document.getElementById("txtECNDeptId").value = "";
+			// document.getElementById("txtECNDeptName").value = "";
 			document.getElementById("hdnECNUnitManager").value = "";
 		}else if(gRdoIsNeed_1.checked==true){
-			document.getElementById("btnECNDept").disabled = false;
-			document.getElementById("ddlECNFactory").disabled = false;
-			document.getElementById("Dropdown_ECNUnit").disabled = false;
+			// document.getElementById("btnECNDept").disabled = false;
+			// document.getElementById("ddlECNFactory").disabled = false;
+			// document.getElementById("Dropdown_ECNUnit").disabled = false;
 			document.getElementById("btnECNNo").disabled = true;
 			document.getElementById("txtECNNo").value = "";
 		}
@@ -1355,7 +1392,7 @@ function getRUFactory(){
 
 	// 2016-03-16
 	var rs=tNaNaConn.query(tSql);
-    if(rs.length>0){
+    /*if(rs.length>0){
 		DWRUtil.removeAllOptions("ddlECNFactory");
         // gDdlRUFactory.options.add(new Option('---請選擇---', '$$$$$$'));
         gDdlECNFactory.options.add(new Option('---請選擇---', '$$$$$$'));
@@ -1365,7 +1402,7 @@ function getRUFactory(){
             // gDdlRUFactory.options[gDdlRUFactory.length] = opt;
             gDdlECNFactory.options[gDdlECNFactory.length] = opt;
         }
-    }
+    }*/
 
     if(rs.length>0){
 		DWRUtil.removeAllOptions("ddlRUFactory");
@@ -1389,10 +1426,10 @@ function getRUFactory(){
 	// 	gHdnRUFactory.value = gDdlRUFactory.value; //將下拉表單value存入隱藏欄位
 	// 	gHdnRUFactoryName.value = gDdlRUFactory.options[gDdlRUFactory.selectedIndex].text; //將下拉表單text存入隱藏欄位
 	// }
-	if(gHdnECNFactory.value!=""){
+	/*if(gHdnECNFactory.value!=""){
 		gDdlECNFactory.value=gHdnECNFactory.value;
 		gHdnECNFactoryName.value =  gDdlECNFactory.options[gDdlECNFactory.selectedIndex].text; //將下拉表單text存入隱藏欄位
-	}
+	}*/
 	// else{
 	// 	gHdnECNFactory.value = gDdlECNFactory.value; //將下拉表單value存入隱藏欄位
 	// 	gHdnECNFactoryName.value = gDdlECNFactory.options[gDdlECNFactory.selectedIndex].text; //將下拉表單text存入隱藏欄位
@@ -1629,7 +1666,7 @@ function Textbox_DocNo_onchange(){
  //文件/工具編號 點擊判斷  
 function rdoModDocIsNeed_onclick(){
 	if(gRdoModDocIsNeed_1.checked==true){
-		alert("警告！\n請詳述不需要之理由，嚴禁僅用'NA'字眼描述！");
+		// alert("警告！\n請詳述不需要之理由，嚴禁僅用'NA'字眼描述！");
 		gHdnModDocIsNeed.value = "N";
 	}else{
 		gHdnModDocIsNeed.value = "Y";
@@ -1754,27 +1791,27 @@ function gridRowClick(pGridId){
 	    	gRdoIsNeed_1.checked = true;
 	    }
 	    // alert('gHdnECNFactory.value: ' + gHdnECNFactory.value);
-	    if(gHdnECNFactory.value != '') {
+	    /*if(gHdnECNFactory.value != '') {
 	    	gDdlECNFactory.value = gHdnECNFactory.value;
 	    } else {
 	    	gDdlECNFactory.value = '$$$$$$';
-	    }
+	    }*/
 
      	if(activityId=="RelateUnits" || activityId=="ECNUnitManager"){
 			if(gRdoIsNeed_0.checked==true){
-				document.getElementById("btnECNDept").disabled = true;
-				document.getElementById("ddlECNFactory").disabled = true;
-				document.getElementById("Dropdown_ECNUnit").disabled = true;
+				// document.getElementById("btnECNDept").disabled = true;
+				// document.getElementById("ddlECNFactory").disabled = true;
+				// document.getElementById("Dropdown_ECNUnit").disabled = true;
 				document.getElementById("btnECNNo").disabled = false;
-				document.getElementById("ddlECNFactory").value = "$$$$$$";
-				document.getElementById("Dropdown_ECNUnit").value = "1";
-				document.getElementById("txtECNDeptId").value = "";
-				document.getElementById("txtECNDeptName").value = "";
+				// document.getElementById("ddlECNFactory").value = "$$$$$$";
+				// document.getElementById("Dropdown_ECNUnit").value = "1";
+				// document.getElementById("txtECNDeptId").value = "";
+				// document.getElementById("txtECNDeptName").value = "";
 				document.getElementById("hdnECNUnitManager").value = "";
 			}else if(gRdoIsNeed_1.checked==true){
-				document.getElementById("btnECNDept").disabled = false;
-				document.getElementById("ddlECNFactory").disabled = false;
-				document.getElementById("Dropdown_ECNUnit").disabled = false;
+				// document.getElementById("btnECNDept").disabled = false;
+				// document.getElementById("ddlECNFactory").disabled = false;
+				// document.getElementById("Dropdown_ECNUnit").disabled = false;
 				document.getElementById("btnECNNo").disabled = true;
 				document.getElementById("txtECNNo").value = "";
 			}
@@ -1830,13 +1867,13 @@ function Button_ModDocAdd_onclick() {
 	if (gTxtModDocNo.value != "" && gRdoModDocIsNeed_0.checked == false && gRdoModDocIsNeed_1.checked == false) {
 		msg += "請選擇文件是否需要變更!!\n";
 	}
-	if(gRdoModDocIsNeed_1.checked==true){
+	/*if(gRdoModDocIsNeed_1.checked==true){
 		if(gTxaDocUnNessResason.value==""){
 			msg+="請填寫不需要變更原因!!\n";
 		}
 	} else {
 		gTxaDocUnNessResason.value="";
-	}
+	}*/
 	saveAbortDate();
 	if(document.getElementById("ModDoc_AbortDate").value == ""){
 		msg+='尚未設定工作行事曆，請聯繫資訊部相關人員處理!!\n';
@@ -1872,6 +1909,9 @@ function Button_ModDocAdd_onclick() {
 }
 
 function Button_ModDocEdit_onclick() {
+	if(!isGridRowAuthorizedForEdit(Grid_ModDocObj, 2)) {
+		return false;
+	}
 	var msg="";
 
 	var tGridDataRec = Grid_ModDocObj.getData();
@@ -1890,13 +1930,13 @@ function Button_ModDocEdit_onclick() {
 	if(gTxtModDocNo.value!=""&&gRdoModDocIsNeed_0.checked==false&&gRdoModDocIsNeed_1.checked==false){
 		msg+="請選擇文件是否需要變更!!\n";
 	}
-	if(gRdoModDocIsNeed_1.checked==true){
+	/*if(gRdoModDocIsNeed_1.checked==true){
 		if(gTxaDocUnNessResason.value==""){
 			msg+="請填寫不需要變更原因!!\n";
 		}
 	} else {
 		gTxaDocUnNessResason.value="";
-	}
+	}*/
 	saveAbortDate();
 	if(document.getElementById("ModDoc_AbortDate").value == ""){
 		msg+='尚未設定工作行事曆，請聯繫資訊部相關人員處理!!\n';
@@ -1927,6 +1967,10 @@ function Button_ModDocEdit_onclick() {
 }
 
 function Button_ModDocDel_onclick() {
+	if(!isGridRowAuthorizedForEdit(Grid_ModDocObj, 2)) {
+		return false;
+	}
+
 	var tGridDataRec = Grid_ModDocObj.getData();
 	if(tGridDataRec[Grid_ModDocObj.getSelectionProperty("index")][36] == "Y") {
 		alert("此筆文件編號已經成功自動發起ISO文件變更單，不允許刪除!!");
@@ -2079,12 +2123,25 @@ function Grid_ECNModRecord_init() {
 // 2016-03-15
 function Grid_ModDoc_init() {
 	//取出儲存在隱藏欄位中的Grid資料
-	var grd_ModDoc_value = document.getElementById("Grid_ModDoc").value;//取出儲存在隱藏欄位中的Grid資料  
-	if(typeof(grd_ModDoc_value) != "undefined"){//判斷grid物件是否存在表單中   
-		if(grd_ModDoc_value.length >1  && (document.getElementById("Grid_ModDoc~~TABLE")==null)){//判斷Grid是否有資料  
-			Grid_ModDocObj.reload(eval(grd_ModDoc_value));//若Grid有資料則將存於隱藏中的值載入Grid中   
-		}   
+	var hdnGrid_ModDoc_v = document.getElementById('hdnGrid_ModDoc').value;  // session bean 回写的grd信息
+	// alert('hdnGrid_ModDoc_v:\n' + hdnGrid_ModDoc_v);
+	// alert(hdnGrid_ModDoc_v.length);
+	// var arr = eval(hdnGrid_ModDoc_v);
+	// alert('arr.length: ' + arr.length);
+
+	if(hdnGrid_ModDoc_v == '') {
+		var grd_ModDoc_value = document.getElementById("Grid_ModDoc").value;//取出儲存在隱藏欄位中的Grid資料  
+		if(typeof(grd_ModDoc_value) != "undefined"){//判斷grid物件是否存在表單中   
+			if(grd_ModDoc_value.length >1  && (document.getElementById("Grid_ModDoc~~TABLE")==null)){//判斷Grid是否有資料  
+				Grid_ModDocObj.reload(eval(grd_ModDoc_value));//若Grid有資料則將存於隱藏中的值載入Grid中   
+			}   
+		}	
+	} else {
+		Grid_ModDocObj.reload(eval(hdnGrid_ModDoc_v));
+		gGrid_ModDoc.value =Grid_ModDocObj.toArrayString();
 	}
+
+	
 }
 
 
@@ -2122,8 +2179,6 @@ function init_for_formOpen() {
 	Grid_ECNModRecord_init();
 	Grid_ModDoc_init();
 
-	// Grid_ModDocObj.setColumnIndices([0,1,3,4,5,8,10,12,13,14,16,17,18,20,21,22,28,33,36,37,38]);
-
 	if(gHdnPrice.value != '') {
 		gDdlPrice.value = gHdnPrice.value;
 	}
@@ -2151,7 +2206,7 @@ function setDisable() {
 	gBtnCAR_SBU.disabled=false;
 	//gRdoIsNeed.disabled=false;
 	gTxaUnNessResason.disabled=false;
-	// gDropdown_ECNUnit.disabled=false;
+	gDropdown_ECNUnit.style.display="none";
 
 	gButton_ModECNEdit.disabled=false;
 	
@@ -2161,15 +2216,25 @@ function setDisable() {
 	gButton_DelLeadUnit.disabled=false;
 
 	gDdlECNFactory.disabled=true;
+	gDdlECNFactory.style.display="none";
 	gDropdown_ECNUnit.disabled = true;
 
 	gTxaDocUnNessResason.disabled = false;
 	gTxaDocUnNessResason.readonly="";
+	gTxaDocUnNessResason.style.display="none";
+
 	tBtnModDocNo.disabled = true;
 	tButton_ModDocAdd.disabled = true;
 	tButton_ModDocEdit.disabled = true;
 	tButton_ModDocDel.disabled = true;
 	tBtnCustDocOwner.disabled = true;
+
+	document.getElementById('Label_ECNAppNo').style.display = "none";
+	document.getElementById('Label_ECNFactory').style.display = "none";
+	document.getElementById('Label_ECNDept').style.display = "none";
+	gBtnECNDept.style.display = "none";
+	gTxtECNDeptId.style.display = "none";
+	gTxtECNDeptName.style.display = "none";
 }
 
 function setRdoModDocIsNeedDisable(pFlag) {
@@ -2291,7 +2356,8 @@ function storeNoNeedToClear_forGrid_ModDoc() {
 	hdnModInvoke_restore = document.getElementById('hdnModInvoke').value;
 	hdnPrice_restore = document.getElementById('hdnPrice').value;
 	hdnModDocDCCGroups_restore = document.getElementById('hdnModDocDCCGroups').value;
-	TextArea_ModDocModreason_restore = document.getElementById('TextArea_ModDocModreason').value;
+	// TextArea_ModDocModreason_restore = document.getElementById('TextArea_ModDocModreason').value;
+	document.getElementById("TextArea_ModDocModreason").value = "此文件變更單係由顧客文件審查單自動發起，單號：\[" + document.getElementById('SerialNumber').innerHTML + "\]";
 
 }
 
@@ -2303,7 +2369,8 @@ function revertNoNeedToClear_forGrid_ModDoc() {
 	document.getElementById('hdnModInvoke').value = hdnModInvoke_restore;
 	document.getElementById('hdnPrice').value = hdnPrice_restore;
 	document.getElementById('hdnModDocDCCGroups').value = hdnModDocDCCGroups_restore;
-	document.getElementById('TextArea_ModDocModreason').value = TextArea_ModDocModreason_restore;
+	// document.getElementById('TextArea_ModDocModreason').value = TextArea_ModDocModreason_restore;
+	document.getElementById("TextArea_ModDocModreason").value = "此文件變更單係由顧客文件審查單自動發起，單號：\[" + document.getElementById('SerialNumber').innerHTML + "\]";
 
 
 	// alert('in revertNoNeedToClear_forGrid_ModDoc() method:  gTxtCustDocOwner: ' + gTxtCustDocOwner.value + ' ' +
@@ -2333,6 +2400,47 @@ function revertNoNeedToClear_forGrid_ECNModRecord() {
 	// document.getElementById('hdnModDocDCCGroups').value = hdnModDocDCCGroups_restore;
 
 }
+
+
+// 判断Grid_ECNModRecord中是否存在当前user的记录
+function isGrid_ECNModRecord_containCurrentUser() {
+	var gridData = Grid_ECNModRecordObj.getData();
+	var isCurrentUserExist = false;
+	for(var i = 0; i < gridData.length; i++) {
+		if(gridData[i][0] == userOID) {
+			isCurrentUserExist = true;
+		}
+	}
+
+	return isCurrentUserExist;
+}
+
+// 判断Grid_ModDoc中是否存在当前user的记录
+/*function isGrid_ModDoc_containCurrentUser() {
+	var gridData = Grid_ModDocObj.getData();
+	var isCurrentUserExist = false;
+	for(var i = 0; i < gridData.length; i++) {
+		if(gridData[i][2] == userOID) {
+			isCurrentUserExist = true;
+		}
+	}
+
+	return isCurrentUserExist;
+}*/
+
+// Grid row 是否有编辑权限
+function isGridRowAuthorizedForEdit(pGridObj, pColIndex) {
+	var isGridRowAuthorized = true;
+	var gridData = pGridObj.getData();
+	var tIndex = pGridObj.getSelectionProperty("index");
+	if(gridData[tIndex][pColIndex] != userOID) {
+		alert("非本人記錄請重新選擇!");
+		isGridRowAuthorized = false;
+	}
+	return isGridRowAuthorized;
+}
+
+
 
 //20160326 Add by Bryan
 function GridStyleSet(){
